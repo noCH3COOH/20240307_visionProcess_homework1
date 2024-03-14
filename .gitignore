@@ -1,4 +1,8 @@
 
 video/
 
+<<<<<<< Updated upstream
 src/
+=======
+.vscode/
+>>>>>>> Stashed changes
