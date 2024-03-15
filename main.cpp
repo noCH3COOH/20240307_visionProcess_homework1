@@ -7,35 +7,56 @@ int main()
     int tem;
     int frame_rate;
     
-    std::string src_file_path = "";
+    string src_file_path = "";
+    string src_file = "";
+    string src_info = "";
 
     ifstream info;
 
-    cout << "输入 YUV 文件路径：" << endl;
+    uni_log.open("log.txt", ios_base::out);
+
+    msg_toLog = "[INFO] 第 " + FLAG_DEBUG;
+    msg_toLog += " 次调试\n";
+    make_log(msg_toLog);
+
+    msg_toLog = "[INFO] 输入 YUV 文件路径：\n";
+    make_log(msg_toLog);
     cin >> src_file_path;
     if(src_file_path.empty())
     {
-        cout << "[ERROR] 文件路径为空" << endl;
+        msg_toLog = "[ERROR] 文件路径为空\n";
+        make_log(msg_toLog);
+
         src_file_path = "./video";
-        cout << "使用默认文件路径：" << src_file_path << endl;
     }
+
+    msg_toLog = "[INFO] 使用文件路径：" + string(src_file_path) + '\n';
+    make_log(msg_toLog);
     
-    src.open((src_file_path + std::string("/test.yuv")).c_str(), ios_base::in);
+    src_file = src_file_path + string("/test.yuv");
+    src.open(src_file.c_str(), ios_base::in);
     if(!src.is_open())
     {
-        cout << "[ERROR] 文件未打开" << endl;
+        msg_toLog =  "[ERROR] 文件未打开\n";
+        make_log(msg_toLog);
         return 1;
     }
+    msg_toLog = "[INFO] 文件已打开：" + src_file + '\n';
+    make_log(msg_toLog);
     
-    info.open((src_file_path + std::string("/videoinfo.txt")).c_str(), ios_base::in);
+    src_info = src_file_path + string("/videoinfo.txt"); 
+    info.open(src_info.c_str(), ios_base::in);
     if(!info.is_open())
     {
-        cout << "[ERROR] 未找到视频信息文件" << endl;
+        msg_toLog =  "[ERROR] 未找到视频信息文件\n";
+        make_log(msg_toLog);
         
-        cout << "选择分辨率：360p (0)、480p (1)、720p (2) 、1080p (3)" << endl;
+        msg_toLog =  "[INFO] 选择分辨率：360p (0)、480p (1)、720p (2) 、1080p (3)\n";
+        make_log(msg_toLog);
         cin >> tem;
     
-        cout << "输入帧率：" << endl;
+        msg_toLog =  "[INFO] 输入帧率：\n";
+        make_log(msg_toLog);
         cin >> frame_rate;
     }
     else
@@ -45,6 +66,11 @@ int main()
         info.get();
 
         info >> frame_rate;
+
+        msg_toLog = "[INFO] 已找到视频信息文件";
+        msg_toLog += " 分辨率:" + (char)tem;
+        msg_toLog += " 帧率" + frame_rate + '\n';
+        make_log(msg_toLog);
     }
 
     if('0' == tem)
@@ -57,38 +83,45 @@ int main()
         fmt = FMT_1080P;
     else
     {
-        cout << "预置无该分辨率" << endl;
+        msg_toLog =  "[ERROR] 预置无该分辨率\n";
+        make_log(msg_toLog);
         return 1;
     }
 
-    std::chrono::milliseconds interval(1000 / frame_rate);
+    chrono::milliseconds interval(1000 / frame_rate);
 
-    // 创建并启动定时器线程
-    std::thread timer(thread3_playVideo, interval);
-    
-    std::thread t1(thread1_inputData);
-    std::thread t2(thread2_transData);
+    VRAM_toPlay = VRAM_sw();
 
-    while(!terminateProgram) 
+    thread t1(thread1_inputData);
+    std::unique_lock<std::mutex> lck(uni_mtx);
+    cdn_v.wait(lck, []{return t1_start;});
+    lck.unlock();
+
+    thread t2(thread2_transData);
+    thread timer(thread3_playVideo, interval);    // 创建并启动定时器线程
+
+    while (!terminateProgram)
     {
-        if (std::cin.peek() == 'q') 
-        {
-            char c;
-            std::cin >> c; // 清除输入缓冲区中的 'q'
-
-            std::unique_lock<std::mutex> lck(mtx);
-            terminateProgram = true; // 设置终止标志 
-            cv_condition_variable.notify_all(); // 通知所有线程终止
-            cout << "用户终止程序" << endl;
-            break; // 退出输入循环
-        }
-        
         if(fileEnd)
         {
-            std::unique_lock<std::mutex> lck(mtx);
-            cv_condition_variable.wait(lck, []{ return (bool)terminateProgram; }); // 等待程序结束
-            cv_condition_variable.notify_all(); // 通知所有线程终止
-            cout << "播放完成，程序结束" << endl;
+            std::unique_lock<std::mutex> lck(uni_mtx);
+            cdn_v.wait(lck, []
+                       { return (bool)terminateProgram; }); // 等待程序结束
+            cdn_v.notify_all();                             // 通知所有线程终止
+            msg_toLog = "[INFO] 播放完成，程序结束\n";
+            make_log(msg_toLog);
+            break; // 退出输入循环
+        }
+        else if(userEnd)
+        {
+            char c;
+            cin >> c; // 清除输入缓冲区中的 'q'
+
+            std::unique_lock<std::mutex> lck(uni_mtx);
+            terminateProgram = true; // 设置终止标志
+            cdn_v.notify_all();      // 通知所有线程终止
+            msg_toLog = "[INFO] 用户终止程序\n";
+            make_log(msg_toLog);
             break; // 退出输入循环
         }
     }
@@ -98,6 +131,8 @@ int main()
     timer.detach();
 
     src.close();
+    info.close();
+    uni_log.close();
     return 0;
 }
 
@@ -110,26 +145,32 @@ void thread1_inputData()
 {
     while(!terminateProgram) 
     {
-        struct VRAM_t* VRAM = nullptr;
         do{
-            VRAM = VRAM_sw();
-        }while(nullptr == VRAM);
+            VRAM_toPlay = VRAM_sw();
+        }while(nullptr == VRAM_toPlay);
 
-        std::unique_lock<std::mutex> lck((*VRAM).mtx);
-        std::cout << "[INFO] 线程一: 开始工作...\n";
+        if(!t1_start)
+        {
+            t1_start = true;
+            cdn_v.notify_one();
+        }
+
+        std::unique_lock<std::mutex> lck((*VRAM_toPlay).vram_mtx);
+        msg_toLog =  "[INFO] 线程一: 开始工作\n";
+        make_log(msg_toLog);
         
-        input_yuvData_1f(&src, fmt, VRAM);
+        input_yuvData_1f(&src, fmt, VRAM_toPlay);
 
-        std::cout << "[INFO] 线程一: 完成工作.\n";
-        threadOneDone = true;
+        msg_toLog =  "[INFO] 线程一: 工作结束\n";
+        make_log(msg_toLog);
 
-        VRAM_needs_to_play = VRAM;    // 通知线程二处理 VRAM 数据
         lck.unlock();
+        t1_done = true;
 
-        cv_condition_variable.notify_all();  // 通知其他线程
+        cdn_v.notify_all();  // 通知其他线程
 
-        cv_condition_variable.wait(lck, []{ return threadTwoDone; }); // 等待线程二完成
-        threadTwoDone = false; // 重置标志位
+        cdn_v.wait(lck, []{ return t2_done; }); // 等待线程二完成
+        t2_done = false; // 重置标志位
     }
 }
 
@@ -140,44 +181,48 @@ void thread2_transData()
 {
     while(!terminateProgram) 
     {
-        std::unique_lock<std::mutex> lck((*VRAM_needs_to_play).mtx);
-        cv_condition_variable.wait(lck, []{ return threadOneDone; }); // 等待线程一完成
+        std::unique_lock<std::mutex> lck((*VRAM_toPlay).vram_mtx);
+        cdn_v.wait(lck, []{ return t1_done; }); // 等待线程一完成
         
-        std::cout << "[INFO] 线程二: 开始工作...\n";
+        msg_toLog =  "[INFO] 线程二: 开始工作\n";
+        make_log(msg_toLog);
         
-        trans_yuv2rgb888_1f(fmt, VRAM_needs_to_play);
+        trans_yuv2rgb888_1f(fmt, VRAM_toPlay);
 
-        std::cout << "[INFO] 线程二: 完成工作.\n";
+        msg_toLog =  "[INFO] 线程二: 结束工作\n";
+        make_log(msg_toLog);
 
-        threadTwoDone = true;
-        cv_condition_variable.notify_all();  // 通知其他线程
+        cdn_v.notify_all();  // 通知其他线程
         lck.unlock();
+        t2_done = true;
         
-        cv_condition_variable.wait(lck, []{ return threadOneDone; }); // 等待线程一再次完成
-        threadOneDone = false; // 重置标志位
+        cdn_v.wait(lck, []{ return t1_done; }); // 等待线程一再次完成
+        t1_done = false; // 重置标志位
     }
 }
 
 /**
  * @brief 视频播放线程
 */
-void thread3_playVideo(std::chrono::milliseconds interval) 
+void thread3_playVideo(chrono::milliseconds interval) 
 {
     while(!terminateProgram) 
     {
-        std::this_thread::sleep_for(interval);    
+        this_thread::sleep_for(interval);    
 
-        std::unique_lock<std::mutex> lck((*VRAM_needs_to_play).mtx);
-        cv_condition_variable.wait(lck, []{ return threadTwoDone; }); // 等待线程二完成
+        std::unique_lock<std::mutex> lck((*VRAM_toPlay).vram_mtx);
+        cdn_v.wait(lck, []{ return t2_done; }); // 等待线程二完成
 
-        std::cout << "[INFO] 线程三: 开始工作...\n";
+        msg_toLog =  "[INFO] 线程三: 开始工作\n";
+        make_log(msg_toLog);
 
-        play_VRAM(fmt, VRAM_needs_to_play);
+        play_VRAM(fmt, VRAM_toPlay);
 
-        std::cout << "[INFO] 线程三: 完成工作.\n";
+        msg_toLog =  "[INFO] 线程三: 结束工作\n";
+        make_log(msg_toLog);
 
-        cv_condition_variable.notify_all();  // 通知其他线程
-        if(fileEnd)
+        cdn_v.notify_all();  // 通知其他线程
+        if(fileEnd || userEnd)
             terminateProgram = true;    // 通知程序结束
 
         lck.unlock();
@@ -185,6 +230,12 @@ void thread3_playVideo(std::chrono::milliseconds interval)
 }
 
 //===================== 实用函数层 =====================
+
+void make_log(string message)
+{
+    cout << message << endl;
+    uni_log.write(message.c_str(), strlen(message.c_str()));
+}
 
 /**
  * @brief 双缓冲切换
@@ -204,7 +255,8 @@ struct VRAM_t* VRAM_sw(void)
     }
     else
     {
-        cout << "[ERROR] VRAM 已满" << endl;
+        msg_toLog =  "[ERROR] VRAM 已满\n";
+        make_log(msg_toLog);
         return nullptr;
     }
 }
@@ -239,11 +291,11 @@ void input_yuvData_1f(ifstream* src, enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
     {
 
         for(int i=0; i<pixel_max_len; i++)
-            (*VRAM).data[3*i] = (*src).get();    // 读取 Y 分量
+            (*src).read((char*)&((*VRAM).data[3*i]), 1);    // 读取 Y 分量
         
         for(int i=0; i<pixel_max_len; i+=2)
         {
-            (*VRAM).data[3*i + 1] = (*src).get();    // 读取 U 分量
+            (*src).read((char*)&((*VRAM).data[3*i + 1]), 1);    // 读取 U 分量
             (*VRAM).data[3*i + 1 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
             (*VRAM).data[3*(i+1) + 1] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
             (*VRAM).data[3*(i+1) + 1 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
@@ -251,7 +303,7 @@ void input_yuvData_1f(ifstream* src, enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
     
         for(int i=0; i<pixel_max_len; i+=2)
         {
-            (*VRAM).data[3*i + 2] = (*src).get();    // 读取 V 分量
+            (*src).read((char*)&((*VRAM).data[3*i + 2]), 1);    // 读取 V 分量
             (*VRAM).data[3*i + 2 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
             (*VRAM).data[3*(i+1) + 2] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
             (*VRAM).data[3*(i+1) + 2 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
@@ -259,13 +311,15 @@ void input_yuvData_1f(ifstream* src, enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
     }
     else if((*src).fail())
     {
-        cout << "[ERROR] 文件已读取完毕" << endl;
+        msg_toLog =  "[ERROR] 文件已读取完毕\n";
+        make_log(msg_toLog);
         (*VRAM).is_empty = true;    // 释放 VRAM
         fileEnd = true;
     }
     else
     {
-        cout << "[ERROR] 文件读取异常" << endl;
+        msg_toLog =  "[ERROR] 文件读取异常\n";
+        make_log(msg_toLog);
         (*VRAM).is_empty = true;    // 释放 VRAM
         fileEnd = true;
     
@@ -323,8 +377,11 @@ void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
     cv::Mat play_frame = cv::Mat(cv::Size(pixelFmt_size[FMT][0], pixelFmt_size[FMT][1])
                                 , CV_8UC3, (*VRAM).data, 0UL);
 
-    cv::imshow("播放 RGB 视频", play_frame);
-    cv::waitKey(0);
+    cv::imshow("RGB 视频", play_frame);
+    
+    int key = cv::waitKey(1);
+    if('q' == key || 'Q' == key)
+        userEnd = true;
 
     (*VRAM).is_empty = true;    // 释放 VRAM
 }

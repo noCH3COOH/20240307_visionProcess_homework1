@@ -18,12 +18,14 @@ using namespace std;
 #define VRAM_MAX_H 1080
 #define VRAM_MAX_COLOR_CHANNEL 3
 
+#define FLAG_DEBUG 2
+
 //===================== struct and enum =====================
 
 struct VRAM_t{
     uint8_t data[(VRAM_MAX_H * VRAM_MAX_W * VRAM_MAX_COLOR_CHANNEL)];
     bool is_empty;
-    std::mutex mtx;
+    std::mutex vram_mtx;
 };
 
 enum PIXEL_FMT{
@@ -39,19 +41,26 @@ enum PIXEL_FMT{
 // 双缓冲
 struct VRAM_t VRAM1 = {{0}, true};
 struct VRAM_t VRAM2 = {{0}, true};
-struct VRAM_t* VRAM_needs_to_play = nullptr;
+struct VRAM_t* VRAM_toPlay = nullptr;
 
 enum PIXEL_FMT fmt;
 
 ifstream src;
+ofstream uni_log;
 
-std::condition_variable cv_condition_variable;
-std::mutex mtx;
-std::atomic<bool> terminateProgram(false);
+condition_variable cdn_v;
 
-bool threadOneDone = false;
-bool threadTwoDone = false;
+mutex uni_mtx;
+
+atomic<bool> terminateProgram(false);
+
+string msg_toLog;
+
+bool t1_start = false;
+bool t1_done = false;
+bool t2_done = false;
 bool fileEnd = false;
+bool userEnd = false;
 
 int pixelFmt_size[4][2] = {
     {480, 360},
@@ -67,6 +76,7 @@ void thread2_transData();
 void thread3_playVideo(std::chrono::milliseconds interval);
 
 struct VRAM_t* VRAM_sw(void);
+void make_log(string message);
 void input_yuvData_1f(ifstream* src, enum PIXEL_FMT FMT, struct VRAM_t* VRAM);
 void trans_yuv2rgb888_1p(uint8_t* src_pixel);
 void trans_yuv2rgb888_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM);
