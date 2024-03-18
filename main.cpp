@@ -159,7 +159,7 @@ void thread1_inputData()
         msg_toLog =  "[INFO] 线程一: 开始工作\n";
         make_log(msg_toLog);
         
-        input_yuvData_1f(&src, fmt, VRAM_toPlay);
+        input_yuvData_1f(fmt, VRAM_toPlay);
 
         msg_toLog =  "[INFO] 线程一: 工作结束\n";
         make_log(msg_toLog);
@@ -267,7 +267,7 @@ struct VRAM_t* VRAM_sw(void)
  * @param FMT 视频分辨率
  * @param VRAM VRAM 数据
 */
-void input_yuvData_1f(ifstream* src, enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
+void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
 {
     int pixel_max_len = pixelFmt_size[FMT][0] * pixelFmt_size[FMT][1];
     
@@ -287,15 +287,15 @@ void input_yuvData_1f(ifstream* src, enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
      * VVVV
     */
 
-    if(!(*src).eof())
+    if(!src.eof())
     {
 
         for(int i=0; i<pixel_max_len; i++)
-            (*src).read((char*)&((*VRAM).data[3*i]), 1);    // 读取 Y 分量
+            src.read((char*)&((*VRAM).data[3*i]), 1);    // 读取 Y 分量
         
         for(int i=0; i<pixel_max_len; i+=2)
         {
-            (*src).read((char*)&((*VRAM).data[3*i + 1]), 1);    // 读取 U 分量
+            src.read((char*)&((*VRAM).data[3*i + 1]), 1);    // 读取 U 分量
             (*VRAM).data[3*i + 1 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
             (*VRAM).data[3*(i+1) + 1] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
             (*VRAM).data[3*(i+1) + 1 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
@@ -303,13 +303,13 @@ void input_yuvData_1f(ifstream* src, enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
     
         for(int i=0; i<pixel_max_len; i+=2)
         {
-            (*src).read((char*)&((*VRAM).data[3*i + 2]), 1);    // 读取 V 分量
+            src.read((char*)&((*VRAM).data[3*i + 2]), 1);    // 读取 V 分量
             (*VRAM).data[3*i + 2 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
             (*VRAM).data[3*(i+1) + 2] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
             (*VRAM).data[3*(i+1) + 2 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
         }
     }
-    else if((*src).fail())
+    else if(src.fail())
     {
         msg_toLog =  "[ERROR] 文件已读取完毕\n";
         make_log(msg_toLog);
