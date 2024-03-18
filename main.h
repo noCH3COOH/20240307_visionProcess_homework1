@@ -77,7 +77,7 @@ void thread3_playVideo(std::chrono::milliseconds interval);
 
 struct VRAM_t* VRAM_sw(void);
 void make_log(string message);
-void input_yuvData_1f(ifstream* src, enum PIXEL_FMT FMT, struct VRAM_t* VRAM);
+void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM);
 void trans_yuv2rgb888_1p(uint8_t* src_pixel);
 void trans_yuv2rgb888_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM);
 void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t* VRAM);
