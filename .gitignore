@@ -1,14 +1,10 @@
 
 video/
 
-<<<<<<< Updated upstream
-src/
-=======
 .vscode/
->>>>>>> Stashed changes
 
 main.o
 
-log.txt
+main.exe
 
-core.927255
+core.*

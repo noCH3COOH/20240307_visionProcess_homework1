@@ -90,14 +90,12 @@ int main()
 
     chrono::milliseconds interval(1000 / frame_rate);
 
-    VRAM_toPlay = VRAM_sw();
-
     thread t1(thread1_inputData);
     std::unique_lock<std::mutex> lck(uni_mtx);
     cdn_v.wait(lck, []{return t1_start;});
     lck.unlock();
 
-    thread t2(thread2_transData);
+    thread t2(thread2_transData, interval);
     thread timer(thread3_playVideo, interval);    // 创建并启动定时器线程
 
     while (!terminateProgram)
@@ -145,21 +143,34 @@ void thread1_inputData()
 {
     while(!terminateProgram) 
     {
-        do{
-            VRAM_toPlay = VRAM_sw();
-        }while(nullptr == VRAM_toPlay);
+        while(nullptr != VRAM_toProcess) 
+        { 
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
+            msg_toLog =  "[ERROR] 线程一: 显存指针未释放\n";
+            make_log(msg_toLog);
+        };
 
-        if(!t1_start)
+        do{
+            VRAM_toProcess = VRAM_sw();
+            if(nullptr == VRAM_toProcess)
+            {
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                msg_toLog =  "[ERROR] 线程一: 显存申请失败\n";
+                make_log(msg_toLog);
+            }
+        }while(nullptr == VRAM_toProcess);
+
+        if(!t1_start)    // 显存申请完毕
         {
             t1_start = true;
             cdn_v.notify_one();
         }
 
-        std::unique_lock<std::mutex> lck((*VRAM_toPlay).vram_mtx);
+        std::unique_lock<std::mutex> lck((*VRAM_toProcess).vram_mtx);
         msg_toLog =  "[INFO] 线程一: 开始工作\n";
         make_log(msg_toLog);
         
-        input_yuvData_1f(fmt, VRAM_toPlay);
+        input_yuvData_1f(fmt, VRAM_toProcess);
 
         msg_toLog =  "[INFO] 线程一: 工作结束\n";
         make_log(msg_toLog);
@@ -177,17 +188,36 @@ void thread1_inputData()
 /**
  * @brief 数据转换线程
 */
-void thread2_transData() 
+void thread2_transData(chrono::milliseconds interval)
 {
     while(!terminateProgram) 
     {
-        std::unique_lock<std::mutex> lck((*VRAM_toPlay).vram_mtx);
+        while(nullptr == VRAM_toProcess) 
+        { 
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            msg_toLog =  "[ERROR] 线程二: VRAM_toProcess 显存指针未指向\n";
+            make_log(msg_toLog);
+        };
+
+        std::unique_lock<std::mutex> lck((*VRAM_toProcess).vram_mtx);
         cdn_v.wait(lck, []{ return t1_done; }); // 等待线程一完成
         
         msg_toLog =  "[INFO] 线程二: 开始工作\n";
         make_log(msg_toLog);
         
-        trans_yuv2rgb888_1f(fmt, VRAM_toPlay);
+        trans_yuv2rgb888_1f(fmt, VRAM_toProcess);
+        
+        // 将 RGB 播放数据传递给线程三，并释放 VRAM_toProcess
+        while(nullptr != VRAM_toPlay) 
+        { 
+            std::this_thread::sleep_for(std::chrono::milliseconds(interval/2));
+            msg_toLog =  "[ERROR] 线程二: VRAM_toPlay 显存指针未释放\n";
+            make_log(msg_toLog);
+        };
+        VRAM_toPlay = VRAM_toProcess;
+        VRAM_toProcess = nullptr;
+        
+        t3_start = true;
 
         msg_toLog =  "[INFO] 线程二: 结束工作\n";
         make_log(msg_toLog);
@@ -208,24 +238,39 @@ void thread3_playVideo(chrono::milliseconds interval)
 {
     while(!terminateProgram) 
     {
-        this_thread::sleep_for(interval);    
-
-        std::unique_lock<std::mutex> lck((*VRAM_toPlay).vram_mtx);
-        cdn_v.wait(lck, []{ return t2_done; }); // 等待线程二完成
+        this_thread::sleep_for(std::chrono::milliseconds(interval));    
 
         msg_toLog =  "[INFO] 线程三: 开始工作\n";
         make_log(msg_toLog);
 
-        play_VRAM(fmt, VRAM_toPlay);
+        if(t3_start) 
+        {
+            msg_toLog =  "[INFO] 线程三: 已准备开始工作\n";
+            make_log(msg_toLog);
+
+            std::unique_lock<std::mutex> lck((*VRAM_toPlay).vram_mtx);
+            cdn_v.wait(lck, []{ return t2_done; }); // 等待线程二完成
+    
+            play_VRAM(fmt, VRAM_toPlay);
+    
+            VRAM_toPlay = nullptr;
+
+            if(fileEnd || userEnd)
+                terminateProgram = true;    // 通知程序结束
+    
+            lck.unlock();
+            t3_start = false;
+        }
+        else
+        {
+            msg_toLog =  "[ERROR] 线程三: 未收到开始工作信息\n";
+            make_log(msg_toLog);
+        }
+
+        cdn_v.notify_all();  // 通知其他线程
 
         msg_toLog =  "[INFO] 线程三: 结束工作\n";
         make_log(msg_toLog);
-
-        cdn_v.notify_all();  // 通知其他线程
-        if(fileEnd || userEnd)
-            terminateProgram = true;    // 通知程序结束
-
-        lck.unlock();
     }
 }
 
@@ -246,11 +291,15 @@ struct VRAM_t* VRAM_sw(void)
     if(VRAM1.is_empty)
     {
         VRAM1.is_empty = false;
+        msg_toLog = "[INFO] 申请到 VRAM1\n";
+        make_log(msg_toLog);
         return &VRAM1;
     }
     else if(VRAM2.is_empty)
     {
         VRAM2.is_empty = false;
+        msg_toLog = "[INFO] 申请到 VRAM2\n";
+        make_log(msg_toLog);
         return &VRAM2;
     }
     else
@@ -289,13 +338,20 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
 
     if(!src.eof())
     {
-
         for(int i=0; i<pixel_max_len; i++)
-            src.read((char*)&((*VRAM).data[3*i]), 1);    // 读取 Y 分量
+        {
+            (*VRAM).data[3*i] = src.get();    // 读取 Y 分量
+        }
         
         for(int i=0; i<pixel_max_len; i+=2)
         {
-            src.read((char*)&((*VRAM).data[3*i + 1]), 1);    // 读取 U 分量
+            if(1 == ( (i / pixelFmt_size[FMT][0]) % 2 ))
+            {
+                i += pixelFmt_size[FMT][0] - 2;
+                continue;
+            }
+    
+            (*VRAM).data[3*i + 1] = src.get();    // 读取 U 分量
             (*VRAM).data[3*i + 1 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
             (*VRAM).data[3*(i+1) + 1] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
             (*VRAM).data[3*(i+1) + 1 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
@@ -303,7 +359,13 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
     
         for(int i=0; i<pixel_max_len; i+=2)
         {
-            src.read((char*)&((*VRAM).data[3*i + 2]), 1);    // 读取 V 分量
+            if(1 == ( (i / pixelFmt_size[FMT][0]) % 2 ))
+            {
+                i += pixelFmt_size[FMT][0] - 2;
+                continue;
+            }
+    
+            (*VRAM).data[3*i + 2] = src.get();    // 读取 V 分量
             (*VRAM).data[3*i + 2 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
             (*VRAM).data[3*(i+1) + 2] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
             (*VRAM).data[3*(i+1) + 2 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量

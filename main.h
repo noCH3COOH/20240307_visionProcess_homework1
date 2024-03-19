@@ -41,6 +41,7 @@ enum PIXEL_FMT{
 // 双缓冲
 struct VRAM_t VRAM1 = {{0}, true};
 struct VRAM_t VRAM2 = {{0}, true};
+struct VRAM_t* VRAM_toProcess = nullptr;
 struct VRAM_t* VRAM_toPlay = nullptr;
 
 enum PIXEL_FMT fmt;
@@ -59,6 +60,7 @@ string msg_toLog;
 bool t1_start = false;
 bool t1_done = false;
 bool t2_done = false;
+bool t3_start = false;
 bool fileEnd = false;
 bool userEnd = false;
 
@@ -72,7 +74,7 @@ int pixelFmt_size[4][2] = {
 //===================== function =====================
 
 void thread1_inputData();
-void thread2_transData();
+void thread2_transData(std::chrono::milliseconds interval);
 void thread3_playVideo(std::chrono::milliseconds interval);
 
 struct VRAM_t* VRAM_sw(void);
