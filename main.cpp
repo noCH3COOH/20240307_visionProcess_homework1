@@ -91,10 +91,6 @@ int main()
     chrono::milliseconds interval(1000 / frame_rate);
 
     thread t1(thread1_inputData);
-    std::unique_lock<std::mutex> lck(uni_mtx);
-    cdn_v.wait(lck, []{return t1_start;});
-    lck.unlock();
-
     thread t2(thread2_transData, interval);
     thread timer(thread3_playVideo, interval);    // 创建并启动定时器线程
 
@@ -145,7 +141,7 @@ void thread1_inputData()
     {
         while(nullptr != VRAM_toProcess) 
         { 
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             msg_toLog =  "[ERROR] 线程一: 显存指针未释放\n";
             make_log(msg_toLog);
         };
@@ -154,15 +150,19 @@ void thread1_inputData()
             VRAM_toProcess = VRAM_sw();
             if(nullptr == VRAM_toProcess)
             {
-                std::this_thread::sleep_for(std::chrono::seconds(2));
+                std::this_thread::sleep_for(std::chrono::seconds(1));
                 msg_toLog =  "[ERROR] 线程一: 显存申请失败\n";
                 make_log(msg_toLog);
             }
-        }while(nullptr == VRAM_toProcess);
+            else
+            {
+                break;
+            }
+        }while(true);
 
-        if(!t1_start)    // 显存申请完毕
+        if(!t1_running)    // 显存申请完毕
         {
-            t1_start = true;
+            t1_running = true;
             cdn_v.notify_one();
         }
 
@@ -182,6 +182,7 @@ void thread1_inputData()
 
         cdn_v.wait(lck, []{ return t2_done; }); // 等待线程二完成
         t2_done = false; // 重置标志位
+        t1_running = false;
     }
 }
 
@@ -192,9 +193,11 @@ void thread2_transData(chrono::milliseconds interval)
 {
     while(!terminateProgram) 
     {
+        while(!t1_running) {}
+
         while(nullptr == VRAM_toProcess) 
         { 
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             msg_toLog =  "[ERROR] 线程二: VRAM_toProcess 显存指针未指向\n";
             make_log(msg_toLog);
         };
@@ -210,17 +213,17 @@ void thread2_transData(chrono::milliseconds interval)
         // 将 RGB 播放数据传递给线程三，并释放 VRAM_toProcess
         while(nullptr != VRAM_toPlay) 
         { 
-            std::this_thread::sleep_for(std::chrono::milliseconds(interval/2));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             msg_toLog =  "[ERROR] 线程二: VRAM_toPlay 显存指针未释放\n";
             make_log(msg_toLog);
         };
         VRAM_toPlay = VRAM_toProcess;
         VRAM_toProcess = nullptr;
         
-        t3_start = true;
-
         msg_toLog =  "[INFO] 线程二: 结束工作\n";
         make_log(msg_toLog);
+        
+        t3_start = true;
 
         cdn_v.notify_all();  // 通知其他线程
         lck.unlock();
@@ -238,39 +241,32 @@ void thread3_playVideo(chrono::milliseconds interval)
 {
     while(!terminateProgram) 
     {
+        std::unique_lock<std::mutex> start_lck(t3_start_mtx);
+        cdn_v.wait(start_lck, []{return t3_start;});
+        start_lck.unlock();   
+
         this_thread::sleep_for(std::chrono::milliseconds(interval));    
 
         msg_toLog =  "[INFO] 线程三: 开始工作\n";
         make_log(msg_toLog);
 
-        if(t3_start) 
-        {
-            msg_toLog =  "[INFO] 线程三: 已准备开始工作\n";
-            make_log(msg_toLog);
+        std::unique_lock<std::mutex> lck((*VRAM_toPlay).vram_mtx);
+        cdn_v.wait(lck, []{ return t2_done; }); // 等待线程二完成
 
-            std::unique_lock<std::mutex> lck((*VRAM_toPlay).vram_mtx);
-            cdn_v.wait(lck, []{ return t2_done; }); // 等待线程二完成
-    
-            play_VRAM(fmt, VRAM_toPlay);
-    
-            VRAM_toPlay = nullptr;
+        play_VRAM(fmt, VRAM_toPlay);
 
-            if(fileEnd || userEnd)
-                terminateProgram = true;    // 通知程序结束
-    
-            lck.unlock();
-            t3_start = false;
-        }
-        else
-        {
-            msg_toLog =  "[ERROR] 线程三: 未收到开始工作信息\n";
-            make_log(msg_toLog);
-        }
+        VRAM_toPlay = nullptr;
+        if(fileEnd || userEnd)
+            terminateProgram = true;    // 通知程序结束
+
+        lck.unlock();
 
         cdn_v.notify_all();  // 通知其他线程
 
         msg_toLog =  "[INFO] 线程三: 结束工作\n";
         make_log(msg_toLog);
+        
+        t3_start = false;
     }
 }
 
@@ -301,6 +297,13 @@ struct VRAM_t* VRAM_sw(void)
         msg_toLog = "[INFO] 申请到 VRAM2\n";
         make_log(msg_toLog);
         return &VRAM2;
+    }
+    else if(VRAM3.is_empty)
+    {
+        VRAM3.is_empty = false;
+        msg_toLog = "[INFO] 申请到 VRAM3\n";
+        make_log(msg_toLog);
+        return &VRAM3;
     }
     else
     {

@@ -41,6 +41,7 @@ enum PIXEL_FMT{
 // 双缓冲
 struct VRAM_t VRAM1 = {{0}, true};
 struct VRAM_t VRAM2 = {{0}, true};
+struct VRAM_t VRAM3 = {{0}, true};
 struct VRAM_t* VRAM_toProcess = nullptr;
 struct VRAM_t* VRAM_toPlay = nullptr;
 
@@ -52,12 +53,13 @@ ofstream uni_log;
 condition_variable cdn_v;
 
 mutex uni_mtx;
+mutex t3_start_mtx;
 
 atomic<bool> terminateProgram(false);
 
 string msg_toLog;
 
-bool t1_start = false;
+bool t1_running = false;
 bool t1_done = false;
 bool t2_done = false;
 bool t3_start = false;
