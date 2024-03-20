@@ -50,19 +50,8 @@ enum PIXEL_FMT fmt;
 ifstream src;
 ofstream uni_log;
 
-condition_variable cdn_v;
-
-mutex uni_mtx;
-mutex t3_start_mtx;
-
-atomic<bool> terminateProgram(false);
-
 string msg_toLog;
 
-bool t1_running = false;
-bool t1_done = false;
-bool t2_done = false;
-bool t3_start = false;
 bool fileEnd = false;
 bool userEnd = false;
 
