@@ -88,7 +88,40 @@ int main()
         return 1;
     }
 
-    int interval = 1000 / frame_rate;
+    cv::namedWindow(WINDOW_NAME, 1);
+    cv::namedWindow(COLOR_WINDOW_NAME, 1);
+
+    // 滑动条
+    cv::createTrackbar("matrix[0][0]", COLOR_WINDOW_NAME, &tem_matrix[0][0]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[0][1]", COLOR_WINDOW_NAME, &tem_matrix[0][1]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[0][2]", COLOR_WINDOW_NAME, &tem_matrix[0][2]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[1][0]", COLOR_WINDOW_NAME, &tem_matrix[1][0]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[1][1]", COLOR_WINDOW_NAME, &tem_matrix[1][1]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[1][2]", COLOR_WINDOW_NAME, &tem_matrix[1][2]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[2][0]", COLOR_WINDOW_NAME, &tem_matrix[2][0]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[2][1]", COLOR_WINDOW_NAME, &tem_matrix[2][1]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[2][2]", COLOR_WINDOW_NAME, &tem_matrix[2][2]
+                        , 100, on_tacker_matrix);
+
+    on_tacker_matrix(tem_matrix[0][0], 0);
+    on_tacker_matrix(tem_matrix[0][1], 0);
+    on_tacker_matrix(tem_matrix[0][2], 0);
+    on_tacker_matrix(tem_matrix[1][0], 0);
+    on_tacker_matrix(tem_matrix[1][1], 0);
+    on_tacker_matrix(tem_matrix[1][2], 0);
+    on_tacker_matrix(tem_matrix[2][0], 0);
+    on_tacker_matrix(tem_matrix[2][1], 0);
+    on_tacker_matrix(tem_matrix[2][2], 0);
+
+    interval = 1000 / frame_rate;
 
     while((!userEnd) || (!fileEnd))
     {
@@ -111,15 +144,40 @@ int main()
         input_yuvData_1f(fmt, VRAM_toProcess);
         trans_yuv2rgb888_1f(fmt, VRAM_toProcess);
         play_VRAM(fmt, VRAM_toProcess);
+        if(userEnd || fileEnd)
+            break;
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(interval));
     }
     
+    cv::destroyAllWindows();
+
+    for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+        {
+            msg_toLog = "";
+            msg_toLog += "matrix[" + std::to_string(i) + "][" + std::to_string(j) + "]: ";
+            msg_toLog += std::to_string(matrix_yuv2rgb[i][j]);
+            msg_toLog += "( " + std::to_string(tem_matrix[i][j]) + " )\n";
+
+            make_log(msg_toLog);
+        }
 
     src.close();
     info.close();
     uni_log.close();
     return 0;
+}
+
+//===================== 回调函数层 =====================
+
+void on_tacker_matrix(int, void*)
+{
+    for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+        {
+            matrix_yuv2rgb[i][j] = (tem_matrix[i][j] - 50) / 16.0;
+        }
 }
 
 //===================== 实用函数层 =====================
@@ -142,20 +200,6 @@ struct VRAM_t *VRAM_sw(void)
         msg_toLog = "[INFO] 申请到 VRAM1\n";
         make_log(msg_toLog);
         return &VRAM1;
-    }
-    else if (VRAM2.is_empty)
-    {
-        VRAM2.is_empty = false;
-        msg_toLog = "[INFO] 申请到 VRAM2\n";
-        make_log(msg_toLog);
-        return &VRAM2;
-    }
-    else if (VRAM3.is_empty)
-    {
-        VRAM3.is_empty = false;
-        msg_toLog = "[INFO] 申请到 VRAM3\n";
-        make_log(msg_toLog);
-        return &VRAM3;
     }
     else
     {
@@ -200,16 +244,16 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 
         for (int i = 0; i < pixel_max_len; i += 2)
         {
-            if (1 == ((i / pixelFmt_size[FMT][0]) % 2))
+            if (1 == ((int)(i / pixelFmt_size[FMT][0]) % 2))
             {
                 i += pixelFmt_size[FMT][0] - 2;
                 continue;
             }
 
             (*VRAM).data[3 * i + 1] = src.get();                                             // 读取 U 分量
-            (*VRAM).data[3 * i + 1 + pixelFmt_size[FMT][0]] = (*VRAM).data[3 * i + 1];       // 重复填充 U 分量
+            (*VRAM).data[3 * (i + pixelFmt_size[FMT][0]) + 1] = (*VRAM).data[3 * i + 1];       // 重复填充 U 分量
             (*VRAM).data[3 * (i + 1) + 1] = (*VRAM).data[3 * i + 1];                         // 重复填充 U 分量
-            (*VRAM).data[3 * (i + 1) + 1 + pixelFmt_size[FMT][0]] = (*VRAM).data[3 * i + 1]; // 重复填充 U 分量
+            (*VRAM).data[3 * (i + 1 + pixelFmt_size[FMT][0]) + 1] = (*VRAM).data[3 * i + 1]; // 重复填充 U 分量
         }
 
         for (int i = 0; i < pixel_max_len; i += 2)
@@ -221,9 +265,9 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
             }
 
             (*VRAM).data[3 * i + 2] = src.get();                                             // 读取 V 分量
-            (*VRAM).data[3 * i + 2 + pixelFmt_size[FMT][0]] = (*VRAM).data[3 * i + 2];       // 重复填充 V 分量
+            (*VRAM).data[3 * (i + pixelFmt_size[FMT][0]) + 2] = (*VRAM).data[3 * i + 2];       // 重复填充 V 分量
             (*VRAM).data[3 * (i + 1) + 2] = (*VRAM).data[3 * i + 2];                         // 重复填充 V 分量
-            (*VRAM).data[3 * (i + 1) + 2 + pixelFmt_size[FMT][0]] = (*VRAM).data[3 * i + 2]; // 重复填充 V 分量
+            (*VRAM).data[3 * (i + 1 + pixelFmt_size[FMT][0]) + 2] = (*VRAM).data[3 * i + 2]; // 重复填充 V 分量
         }
     }
     else if (src.fail())
@@ -249,13 +293,35 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 void trans_yuv2rgb888_1p(uint8_t *src_pixel)
 {
     uint8_t src_yuv_pixel[3];
+
+    // src_yuv_pixel[0] = src_pixel[0];
+    // src_yuv_pixel[1] = src_pixel[1] - 128;
+    // src_yuv_pixel[2] = src_pixel[2] - 128;
+    // src_pixel[0] = src_yuv_pixel[0] + ((360 * src_yuv_pixel[2]) >> 8);
+    // src_pixel[1] = src_yuv_pixel[0] - (( 88* src_yuv_pixel[1] + 184 * src_yuv_pixel[2] ) >> 8);
+    // src_pixel[2] = src_yuv_pixel[0] + ((455 * src_yuv_pixel[2]) >> 8);
+
     src_yuv_pixel[0] = src_pixel[0];
     src_yuv_pixel[1] = src_pixel[1] - 128;
     src_yuv_pixel[2] = src_pixel[2] - 128;
 
-    src_pixel[0] = src_yuv_pixel[0] + (-0.00093) * src_yuv_pixel[1] + 1.401687 * src_yuv_pixel[2];
-    src_pixel[1] = src_yuv_pixel[0] + (-0.3437) * src_yuv_pixel[1] + (-0.71417) * src_yuv_pixel[2];
-    src_pixel[2] = src_yuv_pixel[0] + 1.77216 * src_yuv_pixel[1] + 0.00099 * src_yuv_pixel[2];
+    // src_pixel[0] = src_yuv_pixel[0] + 0 * src_yuv_pixel[1] + 1.4746 * src_yuv_pixel[2];
+    // src_pixel[1] = src_yuv_pixel[0] - 0.1645 * src_yuv_pixel[1] - 0.5713 * src_yuv_pixel[2];
+    // src_pixel[2] = src_yuv_pixel[0] + 1.8814 * src_yuv_pixel[1] - 0.0001 * src_yuv_pixel[2];
+    
+    src_pixel[0] = matrix_yuv2rgb[0][0] * src_yuv_pixel[0] 
+                 + matrix_yuv2rgb[0][1] * src_yuv_pixel[1]
+                 + matrix_yuv2rgb[0][2] * src_yuv_pixel[2];
+    src_pixel[1] = matrix_yuv2rgb[1][0] * src_yuv_pixel[0] 
+                 + matrix_yuv2rgb[1][1] * src_yuv_pixel[1]
+                 + matrix_yuv2rgb[1][2] * src_yuv_pixel[2];
+    src_pixel[2] = matrix_yuv2rgb[2][0] * src_yuv_pixel[0] 
+                 + matrix_yuv2rgb[2][1] * src_yuv_pixel[1]
+                 + matrix_yuv2rgb[2][2] * src_yuv_pixel[2];
+
+    src_pixel[0] = RGB_Check(src_pixel[0]);
+    src_pixel[1] = RGB_Check(src_pixel[1]);
+    src_pixel[2] = RGB_Check(src_pixel[2]);
 }
 
 /**
@@ -277,9 +343,10 @@ void trans_yuv2rgb888_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 
         trans_yuv2rgb888_1p(tem);
 
-        (*VRAM).data[3 * i] = tem[0];
+        // 转换为 OpenCV 使用的 BGR 格式
+        (*VRAM).data[3 * i] = tem[2];
         (*VRAM).data[3 * i + 1] = tem[1];
-        (*VRAM).data[3 * i + 2] = tem[2];
+        (*VRAM).data[3 * i + 2] = tem[0];
     }
 }
 
@@ -292,7 +359,7 @@ void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 {
     cv::Mat play_frame = cv::Mat(cv::Size(pixelFmt_size[FMT][0], pixelFmt_size[FMT][1]), CV_8UC3, (*VRAM).data, 0UL);
 
-    cv::imshow("RGB 视频", play_frame);
+    cv::imshow(WINDOW_NAME, play_frame);
 
     int key = cv::waitKey(1);
     if ('q' == key || 'Q' == key)

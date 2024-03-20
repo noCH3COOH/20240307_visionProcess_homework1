@@ -20,6 +20,11 @@ using namespace std;
 
 #define FLAG_DEBUG 2
 
+#define WINDOW_NAME "RGB 视频"
+#define COLOR_WINDOW_NAME "调色板"
+
+#define RGB_Check(value) ((value >= 0) ? (value <= 255 ? value : 255) : 0) 
+
 //===================== struct and enum =====================
 
 struct VRAM_t{
@@ -40,10 +45,7 @@ enum PIXEL_FMT{
 // H * W * Channel
 // 双缓冲
 struct VRAM_t VRAM1 = {{0}, true};
-struct VRAM_t VRAM2 = {{0}, true};
-struct VRAM_t VRAM3 = {{0}, true};
 struct VRAM_t* VRAM_toProcess = nullptr;
-struct VRAM_t* VRAM_toPlay = nullptr;
 
 enum PIXEL_FMT fmt;
 
@@ -54,7 +56,10 @@ string msg_toLog;
 
 bool fileEnd = false;
 bool userEnd = false;
+bool debug1 = false;
+bool debug2 = false;
 
+int interval;
 int pixelFmt_size[4][2] = {
     {480, 360},
     {640, 480},
@@ -62,7 +67,33 @@ int pixelFmt_size[4][2] = {
     {1920, 1080}
 };
 
+float matrix_yuv2rgb[3][3] = {
+    {1, 0, 2},
+    {1, -0.04, -1.04},
+    {1, 2, 0}
+};
+
+int tem_matrix[3][3] = {
+    {
+        int(matrix_yuv2rgb[0][0]*16.67+50),
+        int(matrix_yuv2rgb[0][1]*16.67+50),
+        int(matrix_yuv2rgb[0][2]*16.67+50), 
+    },
+    {
+        int(matrix_yuv2rgb[1][0]*16.67+50),
+        int(matrix_yuv2rgb[1][1]*16.67+50),
+        int(matrix_yuv2rgb[1][2]*16.67+50), 
+    },
+    {
+        int(matrix_yuv2rgb[2][0]*16.67+50),
+        int(matrix_yuv2rgb[2][1]*16.67+50),
+        int(matrix_yuv2rgb[2][2]*16.67+50), 
+    }
+};
+
 //===================== function =====================
+
+void on_tacker_matrix(int, void*);
 
 void thread1_inputData();
 void thread2_transData(std::chrono::milliseconds interval);
