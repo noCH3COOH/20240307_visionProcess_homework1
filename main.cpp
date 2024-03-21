@@ -223,6 +223,8 @@ struct VRAM_t *VRAM_sw(void)
  */
 void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 {
+    time_t start_time = clock();
+
     int pixel_max_len = pixelFmt_size[FMT][0] * pixelFmt_size[FMT][1];
 
     (*VRAM).is_empty = false; // VRAM 不为空
@@ -290,6 +292,11 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
         (*VRAM).is_empty = true; // 释放 VRAM
         fileEnd = true;
     }
+
+    time_t end_time = clock();
+    time_t cost_time = end_time - start_time;
+    msg_toLog = "[INFO] input_yuvData_1f() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
+    make_log(msg_toLog);
 }
 
 /**
@@ -337,6 +344,8 @@ void trans_yuv2rgb888_1p(uint8_t *src_pixel)
  */
 void trans_yuv2rgb888_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 {
+    time_t start_time = clock();
+
     uint8_t tem[3] = {0};
     int pixel_max_len = pixelFmt_size[FMT][0] * pixelFmt_size[FMT][1];
 
@@ -354,6 +363,11 @@ void trans_yuv2rgb888_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
         (*VRAM).data[3 * i + 1] = tem[1];
         (*VRAM).data[3 * i + 2] = tem[0];
     }
+
+    time_t end_time = clock();
+    time_t cost_time = end_time - start_time;
+    msg_toLog = "[INFO] trans_yuv2rgb888_1f() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
+    make_log(msg_toLog);
 }
 
 /**
@@ -363,13 +377,20 @@ void trans_yuv2rgb888_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
  */
 void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 {
+    time_t start_time = clock();
+
     cv::Mat play_frame = cv::Mat(cv::Size(pixelFmt_size[FMT][0], pixelFmt_size[FMT][1]), CV_8UC3, (*VRAM).data, 0UL);
 
     cv::imshow(WINDOW_NAME, play_frame);
 
-    int key = cv::waitKey(1);
+    int key = cv::waitKey(interval);
     if ('q' == key || 'Q' == key)
         userEnd = true;
 
     (*VRAM).is_empty = true; // 释放 VRAM
+
+    time_t end_time = clock();
+    time_t cost_time = end_time - start_time;
+    msg_toLog = "[INFO] play_VRAM() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
+    make_log(msg_toLog);
 }
