@@ -8,6 +8,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+#include <time.h>
 
 //===================== namespace =====================
 using namespace std;
@@ -19,6 +20,11 @@ using namespace std;
 #define VRAM_MAX_COLOR_CHANNEL 3
 
 #define FLAG_DEBUG 2
+
+#define WINDOW_NAME "RGB 视频"
+#define COLOR_WINDOW_NAME "调色板"
+
+#define RGB_Check(value) ((value >= 0) ? (value <= 255 ? value : 255) : 0) 
 
 //===================== struct and enum =====================
 
@@ -40,32 +46,21 @@ enum PIXEL_FMT{
 // H * W * Channel
 // 双缓冲
 struct VRAM_t VRAM1 = {{0}, true};
-struct VRAM_t VRAM2 = {{0}, true};
-struct VRAM_t VRAM3 = {{0}, true};
 struct VRAM_t* VRAM_toProcess = nullptr;
-struct VRAM_t* VRAM_toPlay = nullptr;
 
 enum PIXEL_FMT fmt;
 
 ifstream src;
 ofstream uni_log;
 
-condition_variable cdn_v;
-
-mutex uni_mtx;
-mutex t3_start_mtx;
-
-atomic<bool> terminateProgram(false);
-
 string msg_toLog;
 
-bool t1_running = false;
-bool t1_done = false;
-bool t2_done = false;
-bool t3_start = false;
 bool fileEnd = false;
 bool userEnd = false;
+bool debug1 = false;
+bool debug2 = false;
 
+int interval;
 int pixelFmt_size[4][2] = {
     {480, 360},
     {640, 480},
@@ -73,7 +68,27 @@ int pixelFmt_size[4][2] = {
     {1920, 1080}
 };
 
+float matrix_yuv2rgb[3][3] = {
+    {0.9, 0, 2},
+    {1, -0.02, -1},
+    {1, 2, 0}
+};
+
+int tem_matrix[3][3] = {
+    {
+        50, 50, 50
+    },
+    {
+        50, 50, 50
+    },
+    {
+        50, 50, 50
+    }
+};
+
 //===================== function =====================
+
+void on_tacker_matrix(int, void*);
 
 void thread1_inputData();
 void thread2_transData(std::chrono::milliseconds interval);

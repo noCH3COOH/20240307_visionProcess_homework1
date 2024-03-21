@@ -6,7 +6,7 @@ int main()
 {
     int tem;
     int frame_rate;
-    
+
     string src_file_path = "";
     string src_file = "";
     string src_info = "";
@@ -22,7 +22,7 @@ int main()
     msg_toLog = "[INFO] 输入 YUV 文件路径：\n";
     make_log(msg_toLog);
     cin >> src_file_path;
-    if(src_file_path.empty())
+    if (src_file_path.empty())
     {
         msg_toLog = "[ERROR] 文件路径为空\n";
         make_log(msg_toLog);
@@ -32,30 +32,30 @@ int main()
 
     msg_toLog = "[INFO] 使用文件路径：" + string(src_file_path) + '\n';
     make_log(msg_toLog);
-    
+
     src_file = src_file_path + string("/test.yuv");
     src.open(src_file.c_str(), ios_base::in);
-    if(!src.is_open())
+    if (!src.is_open())
     {
-        msg_toLog =  "[ERROR] 文件未打开\n";
+        msg_toLog = "[ERROR] 文件未打开\n";
         make_log(msg_toLog);
         return 1;
     }
     msg_toLog = "[INFO] 文件已打开：" + src_file + '\n';
     make_log(msg_toLog);
-    
-    src_info = src_file_path + string("/videoinfo.txt"); 
+
+    src_info = src_file_path + string("/videoinfo.txt");
     info.open(src_info.c_str(), ios_base::in);
-    if(!info.is_open())
+    if (!info.is_open())
     {
-        msg_toLog =  "[ERROR] 未找到视频信息文件\n";
+        msg_toLog = "[ERROR] 未找到视频信息文件\n";
         make_log(msg_toLog);
-        
-        msg_toLog =  "[INFO] 选择分辨率：360p (0)、480p (1)、720p (2) 、1080p (3)\n";
+
+        msg_toLog = "[INFO] 选择分辨率：360p (0)、480p (1)、720p (2) 、1080p (3)\n";
         make_log(msg_toLog);
         cin >> tem;
-    
-        msg_toLog =  "[INFO] 输入帧率：\n";
+
+        msg_toLog = "[INFO] 输入帧率：\n";
         make_log(msg_toLog);
         cin >> frame_rate;
     }
@@ -73,56 +73,97 @@ int main()
         make_log(msg_toLog);
     }
 
-    if('0' == tem)
+    if ('0' == tem)
         fmt = FMT_360P;
-    else if('1' == tem)
+    else if ('1' == tem)
         fmt = FMT_480P;
-    else if('2' == tem)
+    else if ('2' == tem)
         fmt = FMT_720P;
-    else if('3' == tem)
+    else if ('3' == tem)
         fmt = FMT_1080P;
     else
     {
-        msg_toLog =  "[ERROR] 预置无该分辨率\n";
+        msg_toLog = "[ERROR] 预置无该分辨率\n";
         make_log(msg_toLog);
         return 1;
     }
 
-    chrono::milliseconds interval(1000 / frame_rate);
+    cv::namedWindow(WINDOW_NAME, 1);
+    cv::namedWindow(COLOR_WINDOW_NAME, 1);
 
-    thread t1(thread1_inputData);
-    thread t2(thread2_transData, interval);
-    thread timer(thread3_playVideo, interval);    // 创建并启动定时器线程
+    // 滑动条
+    cv::createTrackbar("matrix[0][0]", COLOR_WINDOW_NAME, &tem_matrix[0][0]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[0][1]", COLOR_WINDOW_NAME, &tem_matrix[0][1]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[0][2]", COLOR_WINDOW_NAME, &tem_matrix[0][2]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[1][0]", COLOR_WINDOW_NAME, &tem_matrix[1][0]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[1][1]", COLOR_WINDOW_NAME, &tem_matrix[1][1]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[1][2]", COLOR_WINDOW_NAME, &tem_matrix[1][2]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[2][0]", COLOR_WINDOW_NAME, &tem_matrix[2][0]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[2][1]", COLOR_WINDOW_NAME, &tem_matrix[2][1]
+                        , 100, on_tacker_matrix);
+    cv::createTrackbar("matrix[2][2]", COLOR_WINDOW_NAME, &tem_matrix[2][2]
+                        , 100, on_tacker_matrix);
 
-    while (!terminateProgram)
+    on_tacker_matrix(tem_matrix[0][0], 0);
+    on_tacker_matrix(tem_matrix[0][1], 0);
+    on_tacker_matrix(tem_matrix[0][2], 0);
+    on_tacker_matrix(tem_matrix[1][0], 0);
+    on_tacker_matrix(tem_matrix[1][1], 0);
+    on_tacker_matrix(tem_matrix[1][2], 0);
+    on_tacker_matrix(tem_matrix[2][0], 0);
+    on_tacker_matrix(tem_matrix[2][1], 0);
+    on_tacker_matrix(tem_matrix[2][2], 0);
+
+    interval = 1000 / frame_rate;
+
+    while((!userEnd) || (!fileEnd))
     {
-        if(fileEnd)
-        {
-            std::unique_lock<std::mutex> lck(uni_mtx);
-            cdn_v.wait(lck, []
-                       { return (bool)terminateProgram; }); // 等待程序结束
-            cdn_v.notify_all();                             // 通知所有线程终止
-            msg_toLog = "[INFO] 播放完成，程序结束\n";
-            make_log(msg_toLog);
-            break; // 退出输入循环
-        }
-        else if(userEnd)
-        {
-            char c;
-            cin >> c; // 清除输入缓冲区中的 'q'
 
-            std::unique_lock<std::mutex> lck(uni_mtx);
-            terminateProgram = true; // 设置终止标志
-            cdn_v.notify_all();      // 通知所有线程终止
-            msg_toLog = "[INFO] 用户终止程序\n";
-            make_log(msg_toLog);
-            break; // 退出输入循环
-        }
+        do
+        {
+            VRAM_toProcess = VRAM_sw();
+            if (nullptr == VRAM_toProcess)
+            {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                msg_toLog = "[ERROR] 显存申请失败\n";
+                make_log(msg_toLog);
+            }
+            else
+            {
+                break;
+            }
+        } while (true);
+    
+        input_yuvData_1f(fmt, VRAM_toProcess);
+        trans_yuv2rgb888_1f(fmt, VRAM_toProcess);
+        play_VRAM(fmt, VRAM_toProcess);
+        if(userEnd || fileEnd)
+            break;
+
+        //std::this_thread::sleep_for(std::chrono::milliseconds(interval));
     }
+    
+    cv::destroyAllWindows();
 
-    t1.join();
-    t2.join();
-    timer.detach();
+#ifdef FLAG_DEBUG
+    for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+        {
+            msg_toLog = "";
+            msg_toLog += "matrix[" + std::to_string(i) + "][" + std::to_string(j) + "]: ";
+            msg_toLog += std::to_string(matrix_yuv2rgb[i][j]);
+            msg_toLog += "( " + std::to_string(tem_matrix[i][j]) + " )\n";
+
+            make_log(msg_toLog);
+        }
+#endif
 
     src.close();
     info.close();
@@ -130,144 +171,19 @@ int main()
     return 0;
 }
 
-//===================== 线程层 =====================
+//===================== 回调函数层 =====================
 
-/**
- * @brief 输入数据线程
-*/
-void thread1_inputData() 
+void on_tacker_matrix(int, void*)
 {
-    while(!terminateProgram) 
-    {
-        while(nullptr != VRAM_toProcess) 
-        { 
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            msg_toLog =  "[ERROR] 线程一: 显存指针未释放\n";
-            make_log(msg_toLog);
-        };
-
-        do{
-            VRAM_toProcess = VRAM_sw();
-            if(nullptr == VRAM_toProcess)
-            {
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-                msg_toLog =  "[ERROR] 线程一: 显存申请失败\n";
-                make_log(msg_toLog);
-            }
-            else
-            {
-                break;
-            }
-        }while(true);
-
-        if(!t1_running)    // 显存申请完毕
-        {
-            t1_running = true;
-            cdn_v.notify_one();
-        }
-
-        std::unique_lock<std::mutex> lck((*VRAM_toProcess).vram_mtx);
-        msg_toLog =  "[INFO] 线程一: 开始工作\n";
-        make_log(msg_toLog);
-        
-        input_yuvData_1f(fmt, VRAM_toProcess);
-
-        msg_toLog =  "[INFO] 线程一: 工作结束\n";
-        make_log(msg_toLog);
-
-        lck.unlock();
-        t1_done = true;
-
-        cdn_v.notify_all();  // 通知其他线程
-
-        cdn_v.wait(lck, []{ return t2_done; }); // 等待线程二完成
-        t2_done = false; // 重置标志位
-        t1_running = false;
-    }
-}
-
-/**
- * @brief 数据转换线程
-*/
-void thread2_transData(chrono::milliseconds interval)
-{
-    while(!terminateProgram) 
-    {
-        while(!t1_running) {}
-
-        while(nullptr == VRAM_toProcess) 
-        { 
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            msg_toLog =  "[ERROR] 线程二: VRAM_toProcess 显存指针未指向\n";
-            make_log(msg_toLog);
-        };
-
-        std::unique_lock<std::mutex> lck((*VRAM_toProcess).vram_mtx);
-        cdn_v.wait(lck, []{ return t1_done; }); // 等待线程一完成
-        
-        msg_toLog =  "[INFO] 线程二: 开始工作\n";
-        make_log(msg_toLog);
-        
-        trans_yuv2rgb888_1f(fmt, VRAM_toProcess);
-        
-        // 将 RGB 播放数据传递给线程三，并释放 VRAM_toProcess
-        while(nullptr != VRAM_toPlay) 
-        { 
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            msg_toLog =  "[ERROR] 线程二: VRAM_toPlay 显存指针未释放\n";
-            make_log(msg_toLog);
-        };
-        VRAM_toPlay = VRAM_toProcess;
-        VRAM_toProcess = nullptr;
-        
-        msg_toLog =  "[INFO] 线程二: 结束工作\n";
-        make_log(msg_toLog);
-        
-        t3_start = true;
-
-        cdn_v.notify_all();  // 通知其他线程
-        lck.unlock();
-        t2_done = true;
-        
-        cdn_v.wait(lck, []{ return t1_done; }); // 等待线程一再次完成
-        t1_done = false; // 重置标志位
-    }
-}
-
-/**
- * @brief 视频播放线程
-*/
-void thread3_playVideo(chrono::milliseconds interval) 
-{
-    while(!terminateProgram) 
-    {
-        std::unique_lock<std::mutex> start_lck(t3_start_mtx);
-        cdn_v.wait(start_lck, []{return t3_start;});
-        start_lck.unlock();   
-
-        this_thread::sleep_for(std::chrono::milliseconds(interval));    
-
-        msg_toLog =  "[INFO] 线程三: 开始工作\n";
-        make_log(msg_toLog);
-
-        std::unique_lock<std::mutex> lck((*VRAM_toPlay).vram_mtx);
-        cdn_v.wait(lck, []{ return t2_done; }); // 等待线程二完成
-
-        play_VRAM(fmt, VRAM_toPlay);
-
-        VRAM_toPlay = nullptr;
-        if(fileEnd || userEnd)
-            terminateProgram = true;    // 通知程序结束
-
-        lck.unlock();
-
-        cdn_v.notify_all();  // 通知其他线程
-
-        msg_toLog =  "[INFO] 线程三: 结束工作\n";
-        make_log(msg_toLog);
-        
-        t3_start = false;
-    }
+    matrix_yuv2rgb[0][0] = 0.9 + (tem_matrix[0][0] - 50) / 50.0;
+    matrix_yuv2rgb[0][1] = 0 + (tem_matrix[0][1] - 50) / 50.0;
+    matrix_yuv2rgb[0][2] = 2 + (tem_matrix[0][2] - 50) / 50.0;
+    matrix_yuv2rgb[1][0] = 1 + (tem_matrix[1][0] - 50) / 50.0;
+    matrix_yuv2rgb[1][1] = -0.02 + (tem_matrix[1][1] - 50) / 50.0;
+    matrix_yuv2rgb[1][2] = -1 + (tem_matrix[1][2] - 50) / 50.0;
+    matrix_yuv2rgb[2][0] = 1 + (tem_matrix[2][0] - 50) / 50.0;
+    matrix_yuv2rgb[2][1] = 2 + (tem_matrix[2][1] - 50) / 50.0;
+    matrix_yuv2rgb[2][2] = 0 + (tem_matrix[2][2] - 50) / 50.0;
 }
 
 //===================== 实用函数层 =====================
@@ -281,33 +197,19 @@ void make_log(string message)
 /**
  * @brief 双缓冲切换
  * @return 返回当前空闲的 VRAM
-*/
-struct VRAM_t* VRAM_sw(void)
+ */
+struct VRAM_t *VRAM_sw(void)
 {
-    if(VRAM1.is_empty)
+    if (VRAM1.is_empty)
     {
         VRAM1.is_empty = false;
         msg_toLog = "[INFO] 申请到 VRAM1\n";
         make_log(msg_toLog);
         return &VRAM1;
     }
-    else if(VRAM2.is_empty)
-    {
-        VRAM2.is_empty = false;
-        msg_toLog = "[INFO] 申请到 VRAM2\n";
-        make_log(msg_toLog);
-        return &VRAM2;
-    }
-    else if(VRAM3.is_empty)
-    {
-        VRAM3.is_empty = false;
-        msg_toLog = "[INFO] 申请到 VRAM3\n";
-        make_log(msg_toLog);
-        return &VRAM3;
-    }
     else
     {
-        msg_toLog =  "[ERROR] VRAM 已满\n";
+        msg_toLog = "[ERROR] VRAM 已满\n";
         make_log(msg_toLog);
         return nullptr;
     }
@@ -318,16 +220,18 @@ struct VRAM_t* VRAM_sw(void)
  * @param src YUV 文件流
  * @param FMT 视频分辨率
  * @param VRAM VRAM 数据
-*/
-void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
+ */
+void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 {
+    time_t start_time = clock();
+
     int pixel_max_len = pixelFmt_size[FMT][0] * pixelFmt_size[FMT][1];
-    
-    (*VRAM).is_empty = false;    // VRAM 不为空
+
+    (*VRAM).is_empty = false; // VRAM 不为空
 
     /**
      * 假设数据按 I420 格式存储
-     * 
+     *
      * I420:
      * YYYYYYYY
      * YYYYYYYY
@@ -337,117 +241,156 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
      * UUUU
      * VVVV
      * VVVV
-    */
+     */
 
-    if(!src.eof())
+    if (!src.eof())
     {
-        for(int i=0; i<pixel_max_len; i++)
+        for (int i = 0; i < pixel_max_len; i++)
         {
-            (*VRAM).data[3*i] = src.get();    // 读取 Y 分量
+            (*VRAM).data[3 * i] = src.get(); // 读取 Y 分量
         }
-        
-        for(int i=0; i<pixel_max_len; i+=2)
+
+        for (int i = 0; i < pixel_max_len; i += 2)
         {
-            if(1 == ( (i / pixelFmt_size[FMT][0]) % 2 ))
+            if (1 == ((int)(i / pixelFmt_size[FMT][0]) % 2))
             {
                 i += pixelFmt_size[FMT][0] - 2;
                 continue;
             }
-    
-            (*VRAM).data[3*i + 1] = src.get();    // 读取 U 分量
-            (*VRAM).data[3*i + 1 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
-            (*VRAM).data[3*(i+1) + 1] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
-            (*VRAM).data[3*(i+1) + 1 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 1];    // 重复填充 U 分量
+
+            (*VRAM).data[3 * i + 1] = src.get();                                             // 读取 U 分量
+            (*VRAM).data[3 * (i + pixelFmt_size[FMT][0]) + 1] = (*VRAM).data[3 * i + 1];       // 重复填充 U 分量
+            (*VRAM).data[3 * (i + 1) + 1] = (*VRAM).data[3 * i + 1];                         // 重复填充 U 分量
+            (*VRAM).data[3 * (i + 1 + pixelFmt_size[FMT][0]) + 1] = (*VRAM).data[3 * i + 1]; // 重复填充 U 分量
         }
-    
-        for(int i=0; i<pixel_max_len; i+=2)
+
+        for (int i = 0; i < pixel_max_len; i += 2)
         {
-            if(1 == ( (i / pixelFmt_size[FMT][0]) % 2 ))
+            if (1 == ((i / pixelFmt_size[FMT][0]) % 2))
             {
                 i += pixelFmt_size[FMT][0] - 2;
                 continue;
             }
-    
-            (*VRAM).data[3*i + 2] = src.get();    // 读取 V 分量
-            (*VRAM).data[3*i + 2 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
-            (*VRAM).data[3*(i+1) + 2] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
-            (*VRAM).data[3*(i+1) + 2 + pixelFmt_size[FMT][0]] = (*VRAM).data[3*i + 2];    // 重复填充 V 分量
+
+            (*VRAM).data[3 * i + 2] = src.get();                                             // 读取 V 分量
+            (*VRAM).data[3 * (i + pixelFmt_size[FMT][0]) + 2] = (*VRAM).data[3 * i + 2];       // 重复填充 V 分量
+            (*VRAM).data[3 * (i + 1) + 2] = (*VRAM).data[3 * i + 2];                         // 重复填充 V 分量
+            (*VRAM).data[3 * (i + 1 + pixelFmt_size[FMT][0]) + 2] = (*VRAM).data[3 * i + 2]; // 重复填充 V 分量
         }
     }
-    else if(src.fail())
+    else if (src.fail())
     {
-        msg_toLog =  "[ERROR] 文件已读取完毕\n";
+        msg_toLog = "[ERROR] 文件已读取完毕\n";
         make_log(msg_toLog);
-        (*VRAM).is_empty = true;    // 释放 VRAM
+        (*VRAM).is_empty = true; // 释放 VRAM
         fileEnd = true;
     }
     else
     {
-        msg_toLog =  "[ERROR] 文件读取异常\n";
+        msg_toLog = "[ERROR] 文件读取异常\n";
         make_log(msg_toLog);
-        (*VRAM).is_empty = true;    // 释放 VRAM
+        (*VRAM).is_empty = true; // 释放 VRAM
         fileEnd = true;
-    
     }
+
+    time_t end_time = clock();
+    time_t cost_time = end_time - start_time;
+    msg_toLog = "[INFO] input_yuvData_1f() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
+    make_log(msg_toLog);
 }
 
 /**
  * @brief YUV 转 RGB888 1 个像素点
  * @param src_pixel YUV 数据
-*/
-void trans_yuv2rgb888_1p(uint8_t* src_pixel)
+ */
+void trans_yuv2rgb888_1p(uint8_t *src_pixel)
 {
     uint8_t src_yuv_pixel[3];
+
+    // src_yuv_pixel[0] = src_pixel[0];
+    // src_yuv_pixel[1] = src_pixel[1] - 128;
+    // src_yuv_pixel[2] = src_pixel[2] - 128;
+    // src_pixel[0] = src_yuv_pixel[0] + ((360 * src_yuv_pixel[2]) >> 8);
+    // src_pixel[1] = src_yuv_pixel[0] - (( 88* src_yuv_pixel[1] + 184 * src_yuv_pixel[2] ) >> 8);
+    // src_pixel[2] = src_yuv_pixel[0] + ((455 * src_yuv_pixel[2]) >> 8);
+
     src_yuv_pixel[0] = src_pixel[0];
     src_yuv_pixel[1] = src_pixel[1] - 128;
     src_yuv_pixel[2] = src_pixel[2] - 128;
 
-    src_pixel[0] = src_yuv_pixel[0] + (-0.00093) * src_yuv_pixel[1] + 1.401687 * src_yuv_pixel[2];
-    src_pixel[1] = src_yuv_pixel[0] + (-0.3437) * src_yuv_pixel[1] + (-0.71417) * src_yuv_pixel[2];
-    src_pixel[2] = src_yuv_pixel[0] + 1.77216 * src_yuv_pixel[1] + 0.00099 * src_yuv_pixel[2];
+    // src_pixel[0] = src_yuv_pixel[0] + 0 * src_yuv_pixel[1] + 1.4746 * src_yuv_pixel[2];
+    // src_pixel[1] = src_yuv_pixel[0] - 0.1645 * src_yuv_pixel[1] - 0.5713 * src_yuv_pixel[2];
+    // src_pixel[2] = src_yuv_pixel[0] + 1.8814 * src_yuv_pixel[1] - 0.0001 * src_yuv_pixel[2];
+    
+    src_pixel[0] = matrix_yuv2rgb[0][0] * src_yuv_pixel[0] 
+                 + matrix_yuv2rgb[0][1] * src_yuv_pixel[1]
+                 + matrix_yuv2rgb[0][2] * src_yuv_pixel[2];
+    src_pixel[1] = matrix_yuv2rgb[1][0] * src_yuv_pixel[0] 
+                 + matrix_yuv2rgb[1][1] * src_yuv_pixel[1]
+                 + matrix_yuv2rgb[1][2] * src_yuv_pixel[2];
+    src_pixel[2] = matrix_yuv2rgb[2][0] * src_yuv_pixel[0] 
+                 + matrix_yuv2rgb[2][1] * src_yuv_pixel[1]
+                 + matrix_yuv2rgb[2][2] * src_yuv_pixel[2];
+
+    src_pixel[0] = RGB_Check(src_pixel[0]);
+    src_pixel[1] = RGB_Check(src_pixel[1]);
+    src_pixel[2] = RGB_Check(src_pixel[2]);
 }
 
 /**
  * @brief YUV 转 RGB888
  * @param FMT 视频分辨率
  * @param VRAM VRAM 数据
-*/
-void trans_yuv2rgb888_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
+ */
+void trans_yuv2rgb888_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 {
+    time_t start_time = clock();
+
     uint8_t tem[3] = {0};
     int pixel_max_len = pixelFmt_size[FMT][0] * pixelFmt_size[FMT][1];
 
-    for(int i=0; i<pixel_max_len; i++)
+    for (int i = 0; i < pixel_max_len; i++)
     {
         // 将暂存至 RGB VRAM 的 YUV 数据读取出
-        tem[0] = (*VRAM).data[3*i];
-        tem[1] = (*VRAM).data[3*i + 1];
-        tem[2] = (*VRAM).data[3*i + 2];
+        tem[0] = (*VRAM).data[3 * i];
+        tem[1] = (*VRAM).data[3 * i + 1];
+        tem[2] = (*VRAM).data[3 * i + 2];
 
         trans_yuv2rgb888_1p(tem);
 
-        (*VRAM).data[3*i] = tem[0];
-        (*VRAM).data[3*i + 1] = tem[1];
-        (*VRAM).data[3*i + 2] = tem[2];
+        // 转换为 OpenCV 使用的 BGR 格式
+        (*VRAM).data[3 * i] = tem[2];
+        (*VRAM).data[3 * i + 1] = tem[1];
+        (*VRAM).data[3 * i + 2] = tem[0];
     }
+
+    time_t end_time = clock();
+    time_t cost_time = end_time - start_time;
+    msg_toLog = "[INFO] trans_yuv2rgb888_1f() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
+    make_log(msg_toLog);
 }
 
 /**
  * @brief 播放 VRAM 数据
  * @param FMT 视频分辨率
  * @param VRAM VRAM 数据
-*/
-void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t* VRAM)
+ */
+void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 {
-    cv::Mat play_frame = cv::Mat(cv::Size(pixelFmt_size[FMT][0], pixelFmt_size[FMT][1])
-                                , CV_8UC3, (*VRAM).data, 0UL);
+    time_t start_time = clock();
 
-    cv::imshow("RGB 视频", play_frame);
-    
-    int key = cv::waitKey(1);
-    if('q' == key || 'Q' == key)
+    cv::Mat play_frame = cv::Mat(cv::Size(pixelFmt_size[FMT][0], pixelFmt_size[FMT][1]), CV_8UC3, (*VRAM).data, 0UL);
+
+    cv::imshow(WINDOW_NAME, play_frame);
+
+    int key = cv::waitKey(interval);
+    if ('q' == key || 'Q' == key)
         userEnd = true;
 
-    (*VRAM).is_empty = true;    // 释放 VRAM
-}
+    (*VRAM).is_empty = true; // 释放 VRAM
 
+    time_t end_time = clock();
+    time_t cost_time = end_time - start_time;
+    msg_toLog = "[INFO] play_VRAM() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
+    make_log(msg_toLog);
+}

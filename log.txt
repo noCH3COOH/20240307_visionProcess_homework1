@@ -1,626 +1,93 @@
 NFO] 第  次调试
 [INFO] 输入 YUV 文件路径：
-[INFO] 使用文件路径：./video
-[INFO] 文件已打开：./video/test.yuv
-[INFO] 已找到视频信息文件��束
+[INFO] 使用文件路径：video
+[INFO] 文件已打开：video/test.yuv
+[INFO] 已找到视频信息文件[0][INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.027906ms
+[INFO] trans_yuv2rgb888_1f() 用时0.022492ms
+[INFO] play_VRAM() 用时0.015584s
 [INFO] 申请到 VRAM1
-[INFO] 线程一: 开始工作
-[INFO] 线程一: 工作结束
-[INFO] 线程二: 开始工作
-[INFO] 线程二: 结束工作
-[INFO] 申请到 VRAM2
-[INFO] 线程一: 开始工作
-[ERROR] 线程二: VRAM_toProcess 显存指针未指向
-[INFO] 线程三: 开始工作
-[INFO] 线程一: 工作结束
-[INFO] 线程二: 开始工作
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
-[ERROR] 线程二: VRAM_toPlay 显存指针未释放
+[INFO] input_yuvData_1f() 用时0.024188ms
+[INFO] trans_yuv2rgb888_1f() 用时0.033986ms
+[INFO] play_VRAM() 用时0.019283s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.021862ms
+[INFO] trans_yuv2rgb888_1f() 用时0.024343ms
+[INFO] play_VRAM() 用时0.017619s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.023239ms
+[INFO] trans_yuv2rgb888_1f() 用时0.024395ms
+[INFO] play_VRAM() 用时0.011067s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.020202ms
+[INFO] trans_yuv2rgb888_1f() 用时0.021488ms
+[INFO] play_VRAM() 用时0.010072s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.020849ms
+[INFO] trans_yuv2rgb888_1f() 用时0.022058ms
+[INFO] play_VRAM() 用时0.015531s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.023018ms
+[INFO] trans_yuv2rgb888_1f() 用时0.022619ms
+[INFO] play_VRAM() 用时0.010388s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.020556ms
+[INFO] trans_yuv2rgb888_1f() 用时0.022578ms
+[INFO] play_VRAM() 用时0.008636s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.019389ms
+[INFO] trans_yuv2rgb888_1f() 用时0.022632ms
+[INFO] play_VRAM() 用时0.009568s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.019969ms
+[INFO] trans_yuv2rgb888_1f() 用时0.024665ms
+[INFO] play_VRAM() 用时0.008692s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.025869ms
+[INFO] trans_yuv2rgb888_1f() 用时0.026610ms
+[INFO] play_VRAM() 用时0.008422s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.019297ms
+[INFO] trans_yuv2rgb888_1f() 用时0.022932ms
+[INFO] play_VRAM() 用时0.008733s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.021451ms
+[INFO] trans_yuv2rgb888_1f() 用时0.023599ms
+[INFO] play_VRAM() 用时0.008748s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.019868ms
+[INFO] trans_yuv2rgb888_1f() 用时0.023073ms
+[INFO] play_VRAM() 用时0.008542s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.021672ms
+[INFO] trans_yuv2rgb888_1f() 用时0.023314ms
+[INFO] play_VRAM() 用时0.012441s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.019766ms
+[INFO] trans_yuv2rgb888_1f() 用时0.022164ms
+[INFO] play_VRAM() 用时0.008288s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.019156ms
+[INFO] trans_yuv2rgb888_1f() 用时0.024765ms
+[INFO] play_VRAM() 用时0.008752s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.021767ms
+[INFO] trans_yuv2rgb888_1f() 用时0.024734ms
+[INFO] play_VRAM() 用时0.011812s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.020590ms
+[INFO] trans_yuv2rgb888_1f() 用时0.022764ms
+[INFO] play_VRAM() 用时0.008129s
+[INFO] 申请到 VRAM1
+[INFO] input_yuvData_1f() 用时0.021771ms
+[INFO] trans_yuv2rgb888_1f() 用时0.024204ms
+[INFO] play_VRAM() 用时0.004195s
+matrix[0][0]: 0.900000( 50 )
+matrix[0][1]: 0.000000( 50 )
+matrix[0][2]: 2.000000( 50 )
+matrix[1][0]: 1.000000( 50 )
+matrix[1][1]: -0.020000( 50 )
+matrix[1][2]: -1.000000( 50 )
+matrix[2][0]: 1.000000( 50 )
+matrix[2][1]: 2.000000( 50 )
+matrix[2][2]: 0.000000( 50 )
