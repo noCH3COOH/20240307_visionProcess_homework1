@@ -68,26 +68,20 @@ int pixelFmt_size[4][2] = {
 };
 
 float matrix_yuv2rgb[3][3] = {
-    {1, 0, 2},
-    {1, -0.04, -1.04},
+    {0.9, 0, 2},
+    {1, -0.02, -1},
     {1, 2, 0}
 };
 
 int tem_matrix[3][3] = {
     {
-        int(matrix_yuv2rgb[0][0]*16.67+50),
-        int(matrix_yuv2rgb[0][1]*16.67+50),
-        int(matrix_yuv2rgb[0][2]*16.67+50), 
+        50, 50, 50
     },
     {
-        int(matrix_yuv2rgb[1][0]*16.67+50),
-        int(matrix_yuv2rgb[1][1]*16.67+50),
-        int(matrix_yuv2rgb[1][2]*16.67+50), 
+        50, 50, 50
     },
     {
-        int(matrix_yuv2rgb[2][0]*16.67+50),
-        int(matrix_yuv2rgb[2][1]*16.67+50),
-        int(matrix_yuv2rgb[2][2]*16.67+50), 
+        50, 50, 50
     }
 };
 

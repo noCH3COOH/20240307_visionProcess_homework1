@@ -152,6 +152,7 @@ int main()
     
     cv::destroyAllWindows();
 
+#ifdef FLAG_DEBUG
     for(int i=0; i<3; i++)
         for(int j=0; j<3; j++)
         {
@@ -162,6 +163,7 @@ int main()
 
             make_log(msg_toLog);
         }
+#endif
 
     src.close();
     info.close();
@@ -173,11 +175,15 @@ int main()
 
 void on_tacker_matrix(int, void*)
 {
-    for(int i=0; i<3; i++)
-        for(int j=0; j<3; j++)
-        {
-            matrix_yuv2rgb[i][j] = (tem_matrix[i][j] - 50) / 16.0;
-        }
+    matrix_yuv2rgb[0][0] = 0.9 + (tem_matrix[0][0] - 50) / 50.0;
+    matrix_yuv2rgb[0][1] = 0 + (tem_matrix[0][1] - 50) / 50.0;
+    matrix_yuv2rgb[0][2] = 2 + (tem_matrix[0][2] - 50) / 50.0;
+    matrix_yuv2rgb[1][0] = 1 + (tem_matrix[1][0] - 50) / 50.0;
+    matrix_yuv2rgb[1][1] = -0.02 + (tem_matrix[1][1] - 50) / 50.0;
+    matrix_yuv2rgb[1][2] = -1 + (tem_matrix[1][2] - 50) / 50.0;
+    matrix_yuv2rgb[2][0] = 1 + (tem_matrix[2][0] - 50) / 50.0;
+    matrix_yuv2rgb[2][1] = 2 + (tem_matrix[2][1] - 50) / 50.0;
+    matrix_yuv2rgb[2][2] = 0 + (tem_matrix[2][2] - 50) / 50.0;
 }
 
 //===================== 实用函数层 =====================
