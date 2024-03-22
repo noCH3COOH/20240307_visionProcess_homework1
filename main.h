@@ -29,6 +29,7 @@ using namespace std;
 //===================== struct and enum =====================
 
 struct VRAM_t{
+    uint8_t raw[(int)(VRAM_MAX_H * VRAM_MAX_W * 1.5)];
     uint8_t data[(VRAM_MAX_H * VRAM_MAX_W * VRAM_MAX_COLOR_CHANNEL)];
     bool is_empty;
     std::mutex vram_mtx;
@@ -45,7 +46,7 @@ enum PIXEL_FMT{
 
 // H * W * Channel
 // 双缓冲
-struct VRAM_t VRAM1 = {{0}, true};
+struct VRAM_t VRAM1 = {{0}, {0}, true};
 struct VRAM_t* VRAM_toProcess = nullptr;
 
 enum PIXEL_FMT fmt;
@@ -61,30 +62,14 @@ bool debug1 = false;
 bool debug2 = false;
 
 int interval;
-int pixelFmt_size[4][2] = {
-    {480, 360},
-    {640, 480},
-    {1280, 720},
-    {1920, 1080}
+int pixelFmt_size[4][4] = {
+    {480, 360, 172800, 216000},    // col, row, col*row, col*row*1.25
+    {640, 480, 307200, 384000},
+    {1280, 720, 921600, 1152000},
+    {1920, 1080, 2073600, 2592000}
 };
 
-float matrix_yuv2rgb[3][3] = {
-    {0.9, 0, 2},
-    {1, -0.02, -1},
-    {1, 2, 0}
-};
-
-int tem_matrix[3][3] = {
-    {
-        50, 50, 50
-    },
-    {
-        50, 50, 50
-    },
-    {
-        50, 50, 50
-    }
-};
+extern const float matrix_yuv2rgb[3][3];
 
 //===================== function =====================
 
@@ -98,7 +83,6 @@ struct VRAM_t* VRAM_sw(void);
 void make_log(string message);
 void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM);
 void trans_yuv2rgb888_1p(uint8_t* src_pixel);
-void trans_yuv2rgb888_1f(enum PIXEL_FMT FMT, struct VRAM_t* VRAM);
 void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t* VRAM);
 
 #endif
