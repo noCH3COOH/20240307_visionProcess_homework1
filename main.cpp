@@ -89,42 +89,13 @@ int main()
     }
 
     cv::namedWindow(WINDOW_NAME, 1);
-    cv::namedWindow(COLOR_WINDOW_NAME, 1);
-
-    // 滑动条
-    cv::createTrackbar("matrix[0][0]", COLOR_WINDOW_NAME, &tem_matrix[0][0]
-                        , 100, on_tacker_matrix);
-    cv::createTrackbar("matrix[0][1]", COLOR_WINDOW_NAME, &tem_matrix[0][1]
-                        , 100, on_tacker_matrix);
-    cv::createTrackbar("matrix[0][2]", COLOR_WINDOW_NAME, &tem_matrix[0][2]
-                        , 100, on_tacker_matrix);
-    cv::createTrackbar("matrix[1][0]", COLOR_WINDOW_NAME, &tem_matrix[1][0]
-                        , 100, on_tacker_matrix);
-    cv::createTrackbar("matrix[1][1]", COLOR_WINDOW_NAME, &tem_matrix[1][1]
-                        , 100, on_tacker_matrix);
-    cv::createTrackbar("matrix[1][2]", COLOR_WINDOW_NAME, &tem_matrix[1][2]
-                        , 100, on_tacker_matrix);
-    cv::createTrackbar("matrix[2][0]", COLOR_WINDOW_NAME, &tem_matrix[2][0]
-                        , 100, on_tacker_matrix);
-    cv::createTrackbar("matrix[2][1]", COLOR_WINDOW_NAME, &tem_matrix[2][1]
-                        , 100, on_tacker_matrix);
-    cv::createTrackbar("matrix[2][2]", COLOR_WINDOW_NAME, &tem_matrix[2][2]
-                        , 100, on_tacker_matrix);
-
-    on_tacker_matrix(tem_matrix[0][0], 0);
-    on_tacker_matrix(tem_matrix[0][1], 0);
-    on_tacker_matrix(tem_matrix[0][2], 0);
-    on_tacker_matrix(tem_matrix[1][0], 0);
-    on_tacker_matrix(tem_matrix[1][1], 0);
-    on_tacker_matrix(tem_matrix[1][2], 0);
-    on_tacker_matrix(tem_matrix[2][0], 0);
-    on_tacker_matrix(tem_matrix[2][1], 0);
-    on_tacker_matrix(tem_matrix[2][2], 0);
 
     interval = 1000 / frame_rate;
+    main_start_time = clock();
 
     while((!userEnd) || (!fileEnd))
     {
+        main_start_time = clock();
 
         do
         {
@@ -142,48 +113,21 @@ int main()
         } while (true);
     
         input_yuvData_1f(fmt, VRAM_toProcess);
-        trans_yuv2rgb888_1f(fmt, VRAM_toProcess);
+        //trans_yuv2rgb888_1f(fmt, VRAM_toProcess);
         play_VRAM(fmt, VRAM_toProcess);
         if(userEnd || fileEnd)
             break;
 
-        //std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+        msg_toLog = "[INFO] 一帧用时" + std::to_string((double)(clock() - main_start_time)/CLOCKS_PER_SEC) + "s\n";
+        make_log(msg_toLog);
     }
     
     cv::destroyAllWindows();
-
-#ifdef FLAG_DEBUG
-    for(int i=0; i<3; i++)
-        for(int j=0; j<3; j++)
-        {
-            msg_toLog = "";
-            msg_toLog += "matrix[" + std::to_string(i) + "][" + std::to_string(j) + "]: ";
-            msg_toLog += std::to_string(matrix_yuv2rgb[i][j]);
-            msg_toLog += "( " + std::to_string(tem_matrix[i][j]) + " )\n";
-
-            make_log(msg_toLog);
-        }
-#endif
 
     src.close();
     info.close();
     uni_log.close();
     return 0;
-}
-
-//===================== 回调函数层 =====================
-
-void on_tacker_matrix(int, void*)
-{
-    matrix_yuv2rgb[0][0] = 0.9 + (tem_matrix[0][0] - 50) / 50.0;
-    matrix_yuv2rgb[0][1] = 0 + (tem_matrix[0][1] - 50) / 50.0;
-    matrix_yuv2rgb[0][2] = 2 + (tem_matrix[0][2] - 50) / 50.0;
-    matrix_yuv2rgb[1][0] = 1 + (tem_matrix[1][0] - 50) / 50.0;
-    matrix_yuv2rgb[1][1] = -0.02 + (tem_matrix[1][1] - 50) / 50.0;
-    matrix_yuv2rgb[1][2] = -1 + (tem_matrix[1][2] - 50) / 50.0;
-    matrix_yuv2rgb[2][0] = 1 + (tem_matrix[2][0] - 50) / 50.0;
-    matrix_yuv2rgb[2][1] = 2 + (tem_matrix[2][1] - 50) / 50.0;
-    matrix_yuv2rgb[2][2] = 0 + (tem_matrix[2][2] - 50) / 50.0;
 }
 
 //===================== 实用函数层 =====================
@@ -224,10 +168,11 @@ struct VRAM_t *VRAM_sw(void)
 void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 {
     time_t start_time = clock();
+    time_t end_time;
+    time_t cost_time;
 
-    int pixel_max_len = pixelFmt_size[FMT][0] * pixelFmt_size[FMT][1];
-
-    (*VRAM).is_empty = false; // VRAM 不为空
+    if((*VRAM).is_empty)
+        (*VRAM).is_empty = false; // VRAM 不为空
 
     /**
      * 假设数据按 I420 格式存储
@@ -245,37 +190,22 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 
     if (!src.eof())
     {
-        for (int i = 0; i < pixel_max_len; i++)
+        src.read((char*)(*VRAM).raw, (pixelFmt_size[FMT][0] * pixelFmt_size[FMT][1] * 1.5));
+
+        uint8_t now_pixel[3] = {0};
+        int half_col = pixelFmt_size[FMT][0] / 2;
+        for(int i=0, now_row=0, now_col=0; i<pixelFmt_size[FMT][2]; i++)
         {
-            (*VRAM).data[3 * i] = src.get(); // 读取 Y 分量
-        }
+            now_row = int(i/pixelFmt_size[FMT][0]);
+            now_col = int(i%pixelFmt_size[FMT][0]);
 
-        for (int i = 0; i < pixel_max_len; i += 2)
-        {
-            if (1 == ((int)(i / pixelFmt_size[FMT][0]) % 2))
-            {
-                i += pixelFmt_size[FMT][0] - 2;
-                continue;
-            }
+            now_pixel[0] = (*VRAM).raw[i];
+            now_pixel[1] = (*VRAM).raw[pixelFmt_size[FMT][2] + int(now_row/2)*half_col + int(now_col/2)];
+            now_pixel[2] = (*VRAM).raw[pixelFmt_size[FMT][3] + int(now_row/2)*half_col + int(now_col/2)];
 
-            (*VRAM).data[3 * i + 1] = src.get();                                             // 读取 U 分量
-            (*VRAM).data[3 * (i + pixelFmt_size[FMT][0]) + 1] = (*VRAM).data[3 * i + 1];       // 重复填充 U 分量
-            (*VRAM).data[3 * (i + 1) + 1] = (*VRAM).data[3 * i + 1];                         // 重复填充 U 分量
-            (*VRAM).data[3 * (i + 1 + pixelFmt_size[FMT][0]) + 1] = (*VRAM).data[3 * i + 1]; // 重复填充 U 分量
-        }
+            trans_yuv2rgb888_1p(now_pixel);
 
-        for (int i = 0; i < pixel_max_len; i += 2)
-        {
-            if (1 == ((i / pixelFmt_size[FMT][0]) % 2))
-            {
-                i += pixelFmt_size[FMT][0] - 2;
-                continue;
-            }
-
-            (*VRAM).data[3 * i + 2] = src.get();                                             // 读取 V 分量
-            (*VRAM).data[3 * (i + pixelFmt_size[FMT][0]) + 2] = (*VRAM).data[3 * i + 2];       // 重复填充 V 分量
-            (*VRAM).data[3 * (i + 1) + 2] = (*VRAM).data[3 * i + 2];                         // 重复填充 V 分量
-            (*VRAM).data[3 * (i + 1 + pixelFmt_size[FMT][0]) + 2] = (*VRAM).data[3 * i + 2]; // 重复填充 V 分量
+            std::memcpy(&((*VRAM).data[3*i]), now_pixel, 3);
         }
     }
     else if (src.fail())
@@ -293,8 +223,8 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
         fileEnd = true;
     }
 
-    time_t end_time = clock();
-    time_t cost_time = end_time - start_time;
+    end_time = clock();
+    cost_time = end_time - start_time;
     msg_toLog = "[INFO] input_yuvData_1f() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
     make_log(msg_toLog);
 }
@@ -307,67 +237,17 @@ void trans_yuv2rgb888_1p(uint8_t *src_pixel)
 {
     uint8_t src_yuv_pixel[3];
 
-    // src_yuv_pixel[0] = src_pixel[0];
-    // src_yuv_pixel[1] = src_pixel[1] - 128;
-    // src_yuv_pixel[2] = src_pixel[2] - 128;
-    // src_pixel[0] = src_yuv_pixel[0] + ((360 * src_yuv_pixel[2]) >> 8);
-    // src_pixel[1] = src_yuv_pixel[0] - (( 88* src_yuv_pixel[1] + 184 * src_yuv_pixel[2] ) >> 8);
-    // src_pixel[2] = src_yuv_pixel[0] + ((455 * src_yuv_pixel[2]) >> 8);
-
     src_yuv_pixel[0] = src_pixel[0];
     src_yuv_pixel[1] = src_pixel[1] - 128;
     src_yuv_pixel[2] = src_pixel[2] - 128;
 
-    // src_pixel[0] = src_yuv_pixel[0] + 0 * src_yuv_pixel[1] + 1.4746 * src_yuv_pixel[2];
-    // src_pixel[1] = src_yuv_pixel[0] - 0.1645 * src_yuv_pixel[1] - 0.5713 * src_yuv_pixel[2];
-    // src_pixel[2] = src_yuv_pixel[0] + 1.8814 * src_yuv_pixel[1] - 0.0001 * src_yuv_pixel[2];
-    
-    src_pixel[0] = matrix_yuv2rgb[0][0] * src_yuv_pixel[0] 
-                 + matrix_yuv2rgb[0][1] * src_yuv_pixel[1]
-                 + matrix_yuv2rgb[0][2] * src_yuv_pixel[2];
-    src_pixel[1] = matrix_yuv2rgb[1][0] * src_yuv_pixel[0] 
-                 + matrix_yuv2rgb[1][1] * src_yuv_pixel[1]
-                 + matrix_yuv2rgb[1][2] * src_yuv_pixel[2];
-    src_pixel[2] = matrix_yuv2rgb[2][0] * src_yuv_pixel[0] 
-                 + matrix_yuv2rgb[2][1] * src_yuv_pixel[1]
-                 + matrix_yuv2rgb[2][2] * src_yuv_pixel[2];
+    src_pixel[2] = (7 * src_yuv_pixel[0] >> 3) + (src_yuv_pixel[2] << 1);
+    src_pixel[1] = src_yuv_pixel[0] - src_yuv_pixel[2];
+    src_pixel[0] = src_yuv_pixel[0] + (src_yuv_pixel[1] << 1);
 
-    src_pixel[0] = RGB_Check(src_pixel[0]);
-    src_pixel[1] = RGB_Check(src_pixel[1]);
-    src_pixel[2] = RGB_Check(src_pixel[2]);
-}
-
-/**
- * @brief YUV 转 RGB888
- * @param FMT 视频分辨率
- * @param VRAM VRAM 数据
- */
-void trans_yuv2rgb888_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
-{
-    time_t start_time = clock();
-
-    uint8_t tem[3] = {0};
-    int pixel_max_len = pixelFmt_size[FMT][0] * pixelFmt_size[FMT][1];
-
-    for (int i = 0; i < pixel_max_len; i++)
-    {
-        // 将暂存至 RGB VRAM 的 YUV 数据读取出
-        tem[0] = (*VRAM).data[3 * i];
-        tem[1] = (*VRAM).data[3 * i + 1];
-        tem[2] = (*VRAM).data[3 * i + 2];
-
-        trans_yuv2rgb888_1p(tem);
-
-        // 转换为 OpenCV 使用的 BGR 格式
-        (*VRAM).data[3 * i] = tem[2];
-        (*VRAM).data[3 * i + 1] = tem[1];
-        (*VRAM).data[3 * i + 2] = tem[0];
-    }
-
-    time_t end_time = clock();
-    time_t cost_time = end_time - start_time;
-    msg_toLog = "[INFO] trans_yuv2rgb888_1f() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
-    make_log(msg_toLog);
+    //src_pixel[0] = RGB_Check(src_pixel[0]);
+    //src_pixel[1] = RGB_Check(src_pixel[1]);
+    //src_pixel[2] = RGB_Check(src_pixel[2]);
 }
 
 /**
@@ -381,6 +261,7 @@ void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 
     cv::Mat play_frame = cv::Mat(cv::Size(pixelFmt_size[FMT][0], pixelFmt_size[FMT][1]), CV_8UC3, (*VRAM).data, 0UL);
 
+    cv::putText(play_frame, msg_frame, cv::Point(20,15), cv::FONT_HERSHEY_COMPLEX_SMALL, 1.0, cv::Scalar(0, 0, 255));
     cv::imshow(WINDOW_NAME, play_frame);
 
     int key = cv::waitKey(interval);
@@ -389,8 +270,11 @@ void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 
     (*VRAM).is_empty = true; // 释放 VRAM
 
-    time_t end_time = clock();
-    time_t cost_time = end_time - start_time;
-    msg_toLog = "[INFO] play_VRAM() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
+    msg_toLog = "[INFO] play_VRAM() 用时" + std::to_string((double)(clock() - start_time)/CLOCKS_PER_SEC) + "s\n";
     make_log(msg_toLog);
+    
+    msg_frame = "";
+    msg_frame += "[INFO] fps: " + std::to_string(1/(double)(clock() - main_start_time)*CLOCKS_PER_SEC);
+    make_log(msg_frame + '\n');
+    msg_frame += "  resolution: " + std::to_string(pixelFmt_size[fmt][0]) + 'x' + std::to_string(pixelFmt_size[fmt][1]);
 }
