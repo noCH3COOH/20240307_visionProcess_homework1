@@ -54,7 +54,10 @@ enum PIXEL_FMT fmt;
 ifstream src;
 ofstream uni_log;
 
+time_t main_start_time;
+
 string msg_toLog;
+string msg_frame;
 
 bool fileEnd = false;
 bool userEnd = false;

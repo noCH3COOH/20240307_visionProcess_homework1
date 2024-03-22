@@ -91,9 +91,11 @@ int main()
     cv::namedWindow(WINDOW_NAME, 1);
 
     interval = 1000 / frame_rate;
+    main_start_time = clock();
 
     while((!userEnd) || (!fileEnd))
     {
+        main_start_time = clock();
 
         do
         {
@@ -116,7 +118,8 @@ int main()
         if(userEnd || fileEnd)
             break;
 
-        //std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+        msg_toLog = "[INFO] 一帧用时" + std::to_string((double)(clock() - main_start_time)/CLOCKS_PER_SEC) + "s\n";
+        make_log(msg_toLog);
     }
     
     cv::destroyAllWindows();
@@ -189,11 +192,6 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
     {
         src.read((char*)(*VRAM).raw, (pixelFmt_size[FMT][0] * pixelFmt_size[FMT][1] * 1.5));
 
-        end_time = clock();
-        cost_time = end_time - start_time;
-        msg_toLog = "[INFO] 数据读入 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
-        make_log(msg_toLog);
-
         uint8_t now_pixel[3] = {0};
         int half_col = pixelFmt_size[FMT][0] / 2;
         for(int i=0, now_row=0, now_col=0; i<pixelFmt_size[FMT][2]; i++)
@@ -209,11 +207,6 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 
             std::memcpy(&((*VRAM).data[3*i]), now_pixel, 3);
         }
-
-        end_time = clock();
-        cost_time = end_time - start_time;
-        msg_toLog = "[INFO] 数据转化 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
-        make_log(msg_toLog);
     }
     else if (src.fail())
     {
@@ -268,6 +261,7 @@ void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 
     cv::Mat play_frame = cv::Mat(cv::Size(pixelFmt_size[FMT][0], pixelFmt_size[FMT][1]), CV_8UC3, (*VRAM).data, 0UL);
 
+    cv::putText(play_frame, msg_frame, cv::Point(20,15), cv::FONT_HERSHEY_COMPLEX_SMALL, 1.0, cv::Scalar(0, 0, 255));
     cv::imshow(WINDOW_NAME, play_frame);
 
     int key = cv::waitKey(interval);
@@ -276,8 +270,11 @@ void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 
     (*VRAM).is_empty = true; // 释放 VRAM
 
-    time_t end_time = clock();
-    time_t cost_time = end_time - start_time;
-    msg_toLog = "[INFO] play_VRAM() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
+    msg_toLog = "[INFO] play_VRAM() 用时" + std::to_string((double)(clock() - start_time)/CLOCKS_PER_SEC) + "s\n";
     make_log(msg_toLog);
+    
+    msg_frame = "";
+    msg_frame += "[INFO] fps: " + std::to_string(1/(double)(clock() - main_start_time)*CLOCKS_PER_SEC);
+    make_log(msg_frame + '\n');
+    msg_frame += "  resolution: " + std::to_string(pixelFmt_size[fmt][0]) + 'x' + std::to_string(pixelFmt_size[fmt][1]);
 }
