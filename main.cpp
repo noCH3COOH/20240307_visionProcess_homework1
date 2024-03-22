@@ -1,13 +1,5 @@
 #include "main.h"
 
-//===================== 全局变量 =====================
-
-const float matrix_yuv2rgb[3][3] = {
-    {0.9, 0, 2},
-    {1, -0.02, -1},
-    {1, 2, 0}
-};
-
 //===================== 主函数 =====================
 
 int main()
@@ -222,39 +214,6 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
         cost_time = end_time - start_time;
         msg_toLog = "[INFO] 数据转化 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
         make_log(msg_toLog);
-
-        //for (int i = 0; i < pixelFmt_size[FMT][2]; i++)
-        //{
-        //    (*VRAM).data[3 * i] = src.get(); // 读取 Y 分量
-        //}
-
-        //for (int i = 0; i < pixelFmt_size[FMT][2]; i += 2)
-        //{
-        //    if (1 == ((int)(i / pixelFmt_size[FMT][0]) % 2))
-        //    {
-        //        i += pixelFmt_size[FMT][0] - 2;
-        //        continue;
-        //    }
-
-        //    (*VRAM).data[3 * i + 1] = src.get();                                             // 读取 U 分量
-        //    (*VRAM).data[3 * (i + pixelFmt_size[FMT][0]) + 1] = (*VRAM).data[3 * i + 1];       // 重复填充 U 分量
-        //    (*VRAM).data[3 * (i + 1) + 1] = (*VRAM).data[3 * i + 1];                         // 重复填充 U 分量
-        //    (*VRAM).data[3 * (i + 1 + pixelFmt_size[FMT][0]) + 1] = (*VRAM).data[3 * i + 1]; // 重复填充 U 分量
-        //}
-
-        //for (int i = 0; i < pixelFmt_size[FMT][2]; i += 2)
-        //{
-        //    if (1 == ((i / pixelFmt_size[FMT][0]) % 2))
-        //    {
-        //        i += pixelFmt_size[FMT][0] - 2;
-        //        continue;
-        //    }
-
-        //    (*VRAM).data[3 * i + 2] = src.get();                                             // 读取 V 分量
-        //    (*VRAM).data[3 * (i + pixelFmt_size[FMT][0]) + 2] = (*VRAM).data[3 * i + 2];       // 重复填充 V 分量
-        //    (*VRAM).data[3 * (i + 1) + 2] = (*VRAM).data[3 * i + 2];                         // 重复填充 V 分量
-        //    (*VRAM).data[3 * (i + 1 + pixelFmt_size[FMT][0]) + 2] = (*VRAM).data[3 * i + 2]; // 重复填充 V 分量
-        //}
     }
     else if (src.fail())
     {
@@ -289,15 +248,9 @@ void trans_yuv2rgb888_1p(uint8_t *src_pixel)
     src_yuv_pixel[1] = src_pixel[1] - 128;
     src_yuv_pixel[2] = src_pixel[2] - 128;
 
-    src_pixel[2] = matrix_yuv2rgb[0][0] * src_yuv_pixel[0] 
-                 + matrix_yuv2rgb[0][1] * src_yuv_pixel[1]
-                 + matrix_yuv2rgb[0][2] * src_yuv_pixel[2];
-    src_pixel[1] = matrix_yuv2rgb[1][0] * src_yuv_pixel[0] 
-                 + matrix_yuv2rgb[1][1] * src_yuv_pixel[1]
-                 + matrix_yuv2rgb[1][2] * src_yuv_pixel[2];
-    src_pixel[0] = matrix_yuv2rgb[2][0] * src_yuv_pixel[0] 
-                 + matrix_yuv2rgb[2][1] * src_yuv_pixel[1]
-                 + matrix_yuv2rgb[2][2] * src_yuv_pixel[2];
+    src_pixel[2] = matrix_yuv2rgb[0][0] * src_yuv_pixel[0] + (src_yuv_pixel[2] << 1);
+    src_pixel[1] = src_yuv_pixel[0] - src_yuv_pixel[2];
+    src_pixel[0] = src_yuv_pixel[0] + (src_yuv_pixel[1] << 1);
 
     src_pixel[0] = RGB_Check(src_pixel[0]);
     src_pixel[1] = RGB_Check(src_pixel[1]);
