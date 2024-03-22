@@ -248,13 +248,13 @@ void trans_yuv2rgb888_1p(uint8_t *src_pixel)
     src_yuv_pixel[1] = src_pixel[1] - 128;
     src_yuv_pixel[2] = src_pixel[2] - 128;
 
-    src_pixel[2] = matrix_yuv2rgb[0][0] * src_yuv_pixel[0] + (src_yuv_pixel[2] << 1);
+    src_pixel[2] = (7 * src_yuv_pixel[0] >> 3) + (src_yuv_pixel[2] << 1);
     src_pixel[1] = src_yuv_pixel[0] - src_yuv_pixel[2];
     src_pixel[0] = src_yuv_pixel[0] + (src_yuv_pixel[1] << 1);
 
-    src_pixel[0] = RGB_Check(src_pixel[0]);
-    src_pixel[1] = RGB_Check(src_pixel[1]);
-    src_pixel[2] = RGB_Check(src_pixel[2]);
+    //src_pixel[0] = RGB_Check(src_pixel[0]);
+    //src_pixel[1] = RGB_Check(src_pixel[1]);
+    //src_pixel[2] = RGB_Check(src_pixel[2]);
 }
 
 /**
