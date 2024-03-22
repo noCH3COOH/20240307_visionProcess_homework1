@@ -61,6 +61,12 @@ bool userEnd = false;
 bool debug1 = false;
 bool debug2 = false;
 
+const float matrix_yuv2rgb[3][3] = {
+    {0.9, 0, 2},
+    {1, -0.02, -1},
+    {1, 2, 0}
+};
+
 int interval;
 int pixelFmt_size[4][4] = {
     {480, 360, 172800, 216000},    // col, row, col*row, col*row*1.25
@@ -72,6 +78,12 @@ int pixelFmt_size[4][4] = {
 extern const float matrix_yuv2rgb[3][3];
 
 //===================== function =====================
+
+void on_tacker_matrix(int, void*);
+
+void thread1_inputData();
+void thread2_transData(std::chrono::milliseconds interval);
+void thread3_playVideo(std::chrono::milliseconds interval);
 
 struct VRAM_t* VRAM_sw(void);
 void make_log(string message);
