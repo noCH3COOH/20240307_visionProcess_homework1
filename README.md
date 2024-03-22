@@ -44,8 +44,16 @@
 ***
 ## 安装过程
 
+1. 配置 OpenCV 的 C++ 接口；
+2. （可选）配置 .vscode 文件以自动输入命令。
+
+注：推荐在 linux 系统下配置 OpenCV ， Windows 下我试了好几次，都不行。
+
 ***
 ## 使用方法
+``` shell
+g++ -g -std=c++11 main.cpp -o main.o -I /usr/local/include -I /usr/local/include/opencv4 -I /usr/local/include/opencv4/opencv2 -L /usr/local/lib -l opencv_core -l opencv_imgproc -l opencv_imgcodecs -l opencv_video -l opencv_ml -l opencv_highgui -l opencv_objdetect -l opencv_flann -l opencv_imgcodecs -l opencv_photo -l opencv_videoio 
+```
 
 ***
 ## 更新日志
