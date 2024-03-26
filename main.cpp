@@ -1,132 +1,207 @@
-#include "main.h"
+//===================== include =====================
+
+#include <iostream>
+#include <fstream>
+#include <opencv2/opencv.hpp>
+#include <time.h>
+#include <thread>
+#include <chrono>
+
+//===================== namespace =====================
+using namespace std;
+
+//===================== define =====================
+
+#define VRAM_MAX_W 3840
+#define VRAM_MAX_H 2160    // 4K
+#define VRAM_MAX_COLOR_CHANNEL 3
+
+//#define FLAG_DEBUG 1
+
+#define WINDOW_NAME "RGB 视频"
+#define COLOR_WINDOW_NAME "调色板"
+
+#define RGB_Check(value) ((value >= 0) ? (value <= 255 ? value : 255) : 0) 
+
+#define get_now() std::chrono::steady_clock::now()
+#define await_time(interval)  (get_now() + std::chrono::duration<double, milli>(interval))
+
+//===================== struct and enum =====================
+
+struct VRAM_t{
+    uint8_t raw[(int)(VRAM_MAX_H * VRAM_MAX_W * 1.5)];
+    uint8_t data[(VRAM_MAX_H * VRAM_MAX_W * VRAM_MAX_COLOR_CHANNEL)];
+    bool is_empty;
+    std::mutex vram_mtx;
+};
+
+//===================== global variable =====================
+
+// H * W * Channel
+// 双缓冲
+struct VRAM_t VRAM1 = {{0}, {0}, true};
+
+ifstream src;
+ofstream uni_log;
+
+string msg_toLog;
+string msg_frame;
+
+bool fileEnd = false;
+bool userEnd = false;
+
+double interval;
+
+int fps = 0;
+int video_size[4] = {0};    // col, row, col*row, col*row*1.25
+
+//===================== function =====================
+
+void make_log(string message);
+void input_yuvData_1f(int* FMT, struct VRAM_t* VRAM);
+void play_VRAM(int* FMT, struct VRAM_t* VRAM);
 
 //===================== 主函数 =====================
 
 int main()
 {
-    int tem;
+    int tem = 1;
     int frame_rate;
+    int average_fps = 0;
+    int fps_count = 0;
+
+    char tem_char;
 
     string src_file_path = "";
-    string src_file = "";
+    string src_filename = "";
     string src_info = "";
 
     ifstream info;
 
+    auto main_start_time = get_now();
+
     uni_log.open("log.txt", ios_base::out);
 
+#ifdef FLAG_DEBUG
     msg_toLog = "[INFO] 第 " + FLAG_DEBUG;
     msg_toLog += " 次调试\n";
     make_log(msg_toLog);
+#endif
 
-    msg_toLog = "[INFO] 输入 YUV 文件路径：\n";
+    msg_toLog = "[INFO] 是否使用默认文件夹内视频(./video/*.yuv) [y/n]：";
     make_log(msg_toLog);
-    cin >> src_file_path;
-    if (src_file_path.empty())
+    cin >> tem_char;
+    if('n' == tem_char)
     {
-        msg_toLog = "[ERROR] 文件路径为空\n";
+        msg_toLog = "[INFO] 请输入路径";
         make_log(msg_toLog);
 
+        cin >> src_file_path;
+    }
+    else if('y' == tem_char)
+    {
         src_file_path = "./video";
     }
-
-    msg_toLog = "[INFO] 使用文件路径：" + string(src_file_path) + '\n';
-    make_log(msg_toLog);
-
-    src_file = src_file_path + string("/test.yuv");
-    src.open(src_file.c_str(), ios_base::in);
-    if (!src.is_open())
+    else
     {
-        msg_toLog = "[ERROR] 文件未打开\n";
+        msg_toLog = "[ERROR] 本程序不提供第三种选项:)";
         make_log(msg_toLog);
-        return 1;
+
+        return -1;
     }
-    msg_toLog = "[INFO] 文件已打开：" + src_file + '\n';
+
+    msg_toLog = "[INFO] 使用文件路径：" + string(src_file_path);
     make_log(msg_toLog);
 
     src_info = src_file_path + string("/videoinfo.txt");
     info.open(src_info.c_str(), ios_base::in);
     if (!info.is_open())
     {
-        msg_toLog = "[ERROR] 未找到视频信息文件\n";
+        msg_toLog = "[ERROR] 未找到视频信息文件";
         make_log(msg_toLog);
 
-        msg_toLog = "[INFO] 选择分辨率：360p (0)、480p (1)、720p (2) 、1080p (3)\n";
+        msg_toLog = "[INFO] 输入分辨率 width ：";
         make_log(msg_toLog);
-        cin >> tem;
+        cin >> video_size[0];
 
-        msg_toLog = "[INFO] 输入帧率：\n";
+        msg_toLog = "[INFO] 输入分辨率 height ：";
+        make_log(msg_toLog);
+        cin >> video_size[1];
+
+        msg_toLog = "[INFO] 输入帧率：";
         make_log(msg_toLog);
         cin >> frame_rate;
     }
     else
     {
-        tem = info.get();
+        info >> src_filename;
 
-        info.get();
+        info >> video_size[0];
+        info >> video_size[1];
 
         info >> frame_rate;
 
         msg_toLog = "[INFO] 已找到视频信息文件";
-        msg_toLog += " 分辨率:" + (char)tem;
-        msg_toLog += " 帧率" + frame_rate + '\n';
+        msg_toLog += " 分辨率:" + std::to_string(video_size[0]) + "x" + std::to_string(video_size[1]);
+        msg_toLog += " 帧率" + frame_rate;
         make_log(msg_toLog);
     }
 
-    if ('0' == tem)
-        fmt = FMT_360P;
-    else if ('1' == tem)
-        fmt = FMT_480P;
-    else if ('2' == tem)
-        fmt = FMT_720P;
-    else if ('3' == tem)
-        fmt = FMT_1080P;
-    else
+    video_size[2] = video_size[0] * video_size[1];
+    video_size[3] = (int)(video_size[0] * video_size[1] * 1.25);
+
+    src_filename = src_file_path + '/' + src_filename + ".yuv";
+    src.open(src_filename.c_str(), ios_base::in);
+    if (!src.is_open())
     {
-        msg_toLog = "[ERROR] 预置无该分辨率\n";
+        msg_toLog = "[ERROR] 文件未打开" + src_filename;
         make_log(msg_toLog);
         return 1;
     }
+    msg_toLog = "[INFO] 文件已打开：" + src_filename;
+    make_log(msg_toLog);
 
     cv::namedWindow(WINDOW_NAME, 1);
 
-    interval = 1000 / frame_rate;
-    main_start_time = clock();
+    interval = 1000.0 / frame_rate;
+    std::chrono::duration<double> cost_time;
 
     while((!userEnd) || (!fileEnd))
     {
-        main_start_time = clock();
-
-        do
-        {
-            VRAM_toProcess = VRAM_sw();
-            if (nullptr == VRAM_toProcess)
-            {
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-                msg_toLog = "[ERROR] 显存申请失败\n";
-                make_log(msg_toLog);
-            }
-            else
-            {
-                break;
-            }
-        } while (true);
+        main_start_time = get_now();
     
-        input_yuvData_1f(fmt, VRAM_toProcess);
-        //trans_yuv2rgb888_1f(fmt, VRAM_toProcess);
-        play_VRAM(fmt, VRAM_toProcess);
+        input_yuvData_1f(video_size, &VRAM1);
+        play_VRAM(video_size, &VRAM1);
         if(userEnd || fileEnd)
             break;
 
-        msg_toLog = "[INFO] 一帧用时" + std::to_string((double)(clock() - main_start_time)/CLOCKS_PER_SEC) + "s\n";
-        make_log(msg_toLog);
+        std::this_thread::sleep_until(await_time(interval));
+        
+        cost_time = get_now() - main_start_time;
+        fps = (1 / cost_time.count());
+
+        if(cost_time.count() > interval)
+        {
+            interval = (interval * interval) / (cost_time.count() * 1000);
+            msg_toLog = "[INFO] 更换等待时间：" + std::to_string(interval);
+            make_log(msg_toLog);
+        }
+
+        average_fps += fps;
+        fps_count += 1;
     }
+
+    average_fps /= fps_count;
     
     cv::destroyAllWindows();
 
     src.close();
     info.close();
     uni_log.close();
+
+    msg_toLog = "[INFO] 平均帧数：" + std::to_string(average_fps);
+    make_log(msg_toLog);
+
     return 0;
 }
 
@@ -134,29 +209,10 @@ int main()
 
 void make_log(string message)
 {
-    cout << message << endl;
-    uni_log.write(message.c_str(), strlen(message.c_str()));
-}
+    message += '\n';
 
-/**
- * @brief 双缓冲切换
- * @return 返回当前空闲的 VRAM
- */
-struct VRAM_t *VRAM_sw(void)
-{
-    if (VRAM1.is_empty)
-    {
-        VRAM1.is_empty = false;
-        msg_toLog = "[INFO] 申请到 VRAM1\n";
-        make_log(msg_toLog);
-        return &VRAM1;
-    }
-    else
-    {
-        msg_toLog = "[ERROR] VRAM 已满\n";
-        make_log(msg_toLog);
-        return nullptr;
-    }
+    cout << message;
+    uni_log.write((message).c_str(), strlen(message.c_str()));
 }
 
 /**
@@ -165,11 +221,13 @@ struct VRAM_t *VRAM_sw(void)
  * @param FMT 视频分辨率
  * @param VRAM VRAM 数据
  */
-void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
+void input_yuvData_1f(int* FMT, struct VRAM_t *VRAM)
 {
+#ifdef FLAG_DEBUG
     time_t start_time = clock();
     time_t end_time;
     time_t cost_time;
+#endif
 
     if((*VRAM).is_empty)
         (*VRAM).is_empty = false; // VRAM 不为空
@@ -190,64 +248,47 @@ void input_yuvData_1f(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
 
     if (!src.eof())
     {
-        src.read((char*)(*VRAM).raw, (pixelFmt_size[FMT][0] * pixelFmt_size[FMT][1] * 1.5));
+        src.read((char*)(*VRAM).raw, (FMT[0] * FMT[1] * 1.5));
 
-        uint8_t now_pixel[3] = {0};
-        int half_col = pixelFmt_size[FMT][0] / 2;
-        for(int i=0, now_row=0, now_col=0; i<pixelFmt_size[FMT][2]; i++)
+        uint8_t src_yuv_pixel[3];
+        int half_col = FMT[0] / 2;
+
+        for (int i = 0, now_row = 0, now_col = 0; i < FMT[2]; i++)
         {
-            now_row = int(i/pixelFmt_size[FMT][0]);
-            now_col = int(i%pixelFmt_size[FMT][0]);
+            now_row = int(i / FMT[0]);
+            now_col = int(i % FMT[0]);
 
-            now_pixel[0] = (*VRAM).raw[i];
-            now_pixel[1] = (*VRAM).raw[pixelFmt_size[FMT][2] + int(now_row/2)*half_col + int(now_col/2)];
-            now_pixel[2] = (*VRAM).raw[pixelFmt_size[FMT][3] + int(now_row/2)*half_col + int(now_col/2)];
+            src_yuv_pixel[0] = (*VRAM).raw[i];
+            src_yuv_pixel[1] = (*VRAM).raw[FMT[2] + int(now_row / 2) * half_col + int(now_col / 2)] - 128;
+            src_yuv_pixel[2] = (*VRAM).raw[FMT[3] + int(now_row / 2) * half_col + int(now_col / 2)] - 128;
 
-            trans_yuv2rgb888_1p(now_pixel);
-
-            std::memcpy(&((*VRAM).data[3*i]), now_pixel, 3);
+            // yuv to rgb
+            (*VRAM).data[3 * i + 2] = 7 * (src_yuv_pixel[0] >> 3) + (src_yuv_pixel[2] << 1);
+            (*VRAM).data[3 * i + 1] = src_yuv_pixel[0] - src_yuv_pixel[2];
+            (*VRAM).data[3 * i] = src_yuv_pixel[0] + (src_yuv_pixel[1] << 1);
         }
     }
     else if (src.fail())
     {
-        msg_toLog = "[ERROR] 文件已读取完毕\n";
+        msg_toLog = "[SUCCESS] 文件已读取完毕";
         make_log(msg_toLog);
         (*VRAM).is_empty = true; // 释放 VRAM
         fileEnd = true;
     }
     else
     {
-        msg_toLog = "[ERROR] 文件读取异常\n";
+        msg_toLog = "[ERROR] 文件读取异常";
         make_log(msg_toLog);
         (*VRAM).is_empty = true; // 释放 VRAM
         fileEnd = true;
     }
 
+#ifdef FLAG_DEBUG
     end_time = clock();
     cost_time = end_time - start_time;
     msg_toLog = "[INFO] input_yuvData_1f() 用时" + std::to_string((double)cost_time/CLOCKS_PER_SEC) + "s\n";
     make_log(msg_toLog);
-}
-
-/**
- * @brief YUV 转 RGB888 1 个像素点
- * @param src_pixel YUV 数据
- */
-void trans_yuv2rgb888_1p(uint8_t *src_pixel)
-{
-    uint8_t src_yuv_pixel[3];
-
-    src_yuv_pixel[0] = src_pixel[0];
-    src_yuv_pixel[1] = src_pixel[1] - 128;
-    src_yuv_pixel[2] = src_pixel[2] - 128;
-
-    src_pixel[2] = (7 * src_yuv_pixel[0] >> 3) + (src_yuv_pixel[2] << 1);
-    src_pixel[1] = src_yuv_pixel[0] - src_yuv_pixel[2];
-    src_pixel[0] = src_yuv_pixel[0] + (src_yuv_pixel[1] << 1);
-
-    //src_pixel[0] = RGB_Check(src_pixel[0]);
-    //src_pixel[1] = RGB_Check(src_pixel[1]);
-    //src_pixel[2] = RGB_Check(src_pixel[2]);
+#endif
 }
 
 /**
@@ -255,26 +296,31 @@ void trans_yuv2rgb888_1p(uint8_t *src_pixel)
  * @param FMT 视频分辨率
  * @param VRAM VRAM 数据
  */
-void play_VRAM(enum PIXEL_FMT FMT, struct VRAM_t *VRAM)
+void play_VRAM(int* FMT, struct VRAM_t *VRAM)
 {
+#ifdef FLAG_DEBUG
     time_t start_time = clock();
+#endif
 
-    cv::Mat play_frame = cv::Mat(cv::Size(pixelFmt_size[FMT][0], pixelFmt_size[FMT][1]), CV_8UC3, (*VRAM).data, 0UL);
+    cv::Mat play_frame = cv::Mat(cv::Size(FMT[0], FMT[1]), CV_8UC3, (*VRAM).data, 0UL);
+    cv::blur(play_frame, play_frame, cv::Size(3, 3));
 
     cv::putText(play_frame, msg_frame, cv::Point(20,15), cv::FONT_HERSHEY_COMPLEX_SMALL, 1.0, cv::Scalar(0, 0, 255));
     cv::imshow(WINDOW_NAME, play_frame);
 
-    int key = cv::waitKey(interval);
+    int key = cv::waitKey(1);
     if ('q' == key || 'Q' == key)
         userEnd = true;
 
     (*VRAM).is_empty = true; // 释放 VRAM
 
+#ifdef FLAG_DEBUG
     msg_toLog = "[INFO] play_VRAM() 用时" + std::to_string((double)(clock() - start_time)/CLOCKS_PER_SEC) + "s\n";
     make_log(msg_toLog);
+#endif
     
     msg_frame = "";
-    msg_frame += "[INFO] fps: " + std::to_string(1/(double)(clock() - main_start_time)*CLOCKS_PER_SEC);
-    make_log(msg_frame + '\n');
-    msg_frame += "  resolution: " + std::to_string(pixelFmt_size[fmt][0]) + 'x' + std::to_string(pixelFmt_size[fmt][1]);
+    msg_frame += "[INFO] fps: " + std::to_string(fps);
+    make_log(msg_frame);
+    msg_frame += "  resolution: " + std::to_string(FMT[0]) + 'x' + std::to_string(FMT[1]);
 }

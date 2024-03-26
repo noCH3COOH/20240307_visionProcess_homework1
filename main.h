@@ -47,7 +47,7 @@ enum PIXEL_FMT{
 // H * W * Channel
 // 双缓冲
 struct VRAM_t VRAM1 = {{0}, {0}, true};
-struct VRAM_t* VRAM_toProcess = nullptr;
+struct VRAM_t* VRAM1 = nullptr;
 
 enum PIXEL_FMT fmt;
 
