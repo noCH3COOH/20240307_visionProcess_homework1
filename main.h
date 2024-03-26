@@ -24,7 +24,7 @@ using namespace std;
 #define WINDOW_NAME "RGB 视频"
 #define COLOR_WINDOW_NAME "调色板"
 
-#define RGB_Check(value) ((value >= 0) ? (value <= 255 ? value : 255) : 0) 
+#define Value_Check(value) ((value >= 0) ? (value <= 255 ? value : 255) : 0) 
 
 //===================== struct and enum =====================
 
@@ -51,8 +51,8 @@ struct VRAM_t* VRAM1 = nullptr;
 
 enum PIXEL_FMT fmt;
 
-ifstream src;
-ofstream uni_log;
+std::ifstream src;
+std::ofstream uni_log;
 
 time_t main_start_time;
 

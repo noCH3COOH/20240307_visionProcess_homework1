@@ -21,10 +21,12 @@ using namespace std;
 #define WINDOW_NAME "RGB 视频"
 #define COLOR_WINDOW_NAME "调色板"
 
-#define RGB_Check(value) ((value >= 0) ? (value <= 255 ? value : 255) : 0) 
+#define Value_Check(value, min, max) ((value >= min) ? (value <= max ? value : max) : min) 
 
 #define get_now() std::chrono::steady_clock::now()
 #define await_time(interval)  (get_now() + std::chrono::duration<double, milli>(interval))
+
+#define compare_x1_approachto_x2(x1, x2) ( (x1 < (x2*0.9) ? false : ( x1 > (x2*1.1) ? false : true )))
 
 //===================== struct and enum =====================
 
@@ -35,14 +37,24 @@ struct VRAM_t{
     std::mutex vram_mtx;
 };
 
+struct PID_t{
+    const float Kp;
+    const float Ki;
+    const float Kd;
+
+    double e[3];
+};
+
 //===================== global variable =====================
 
 // H * W * Channel
 // 双缓冲
 struct VRAM_t VRAM1 = {{0}, {0}, true};
 
-ifstream src;
-ofstream uni_log;
+struct PID_t pid_para = {1.25, 0.6, 0.75, {0,0,0}};
+
+std::ifstream src;
+std::ofstream uni_log;
 
 string msg_toLog;
 string msg_frame;
@@ -61,6 +73,8 @@ void make_log(string message);
 void input_yuvData_1f(int* FMT, struct VRAM_t* VRAM);
 void play_VRAM(int* FMT, struct VRAM_t* VRAM);
 
+double pid_control(double last_value, double target_value);
+
 //===================== 主函数 =====================
 
 int main()
@@ -76,7 +90,7 @@ int main()
     string src_filename = "";
     string src_info = "";
 
-    ifstream info;
+    std::ifstream info;
 
     auto main_start_time = get_now();
 
@@ -147,6 +161,8 @@ int main()
         make_log(msg_toLog);
     }
 
+    make_log("");
+
     video_size[2] = video_size[0] * video_size[1];
     video_size[3] = (int)(video_size[0] * video_size[1] * 1.25);
 
@@ -179,13 +195,14 @@ int main()
         
         cost_time = get_now() - main_start_time;
         fps = (1 / cost_time.count());
+        interval = cost_time.count();
 
-        if(cost_time.count() > interval)
-        {
-            interval = (interval * interval) / (cost_time.count() * 1000);
-            msg_toLog = "[INFO] 更换等待时间：" + std::to_string(interval);
-            make_log(msg_toLog);
-        }
+        interval = pid_control(interval, (1000.0/frame_rate));
+
+#ifdef FLAG_DEBUG
+        msg_toLog = "[INFO] 更换等待时间：" + std::to_string(interval);
+        make_log(msg_toLog);
+#endif
 
         average_fps += fps;
         fps_count += 1;
@@ -213,6 +230,20 @@ void make_log(string message)
 
     cout << message;
     uni_log.write((message).c_str(), strlen(message.c_str()));
+}
+
+double pid_control(double last_value, double target_value)
+{
+    pid_para.e[2] = pid_para.e[1];
+    pid_para.e[1] = pid_para.e[0];
+
+    pid_para.e[0] = Value_Check(target_value - last_value, -50, 50);
+
+    last_value += (pid_para.Kp * (pid_para.e[0] - pid_para.e[1]));
+    last_value += (pid_para.Ki * pid_para.e[0]);
+    last_value += (pid_para.Kd * (pid_para.e[0] - 2*pid_para.e[1] + pid_para.e[2]));
+
+    return last_value;
 }
 
 /**
@@ -250,7 +281,7 @@ void input_yuvData_1f(int* FMT, struct VRAM_t *VRAM)
     {
         src.read((char*)(*VRAM).raw, (FMT[0] * FMT[1] * 1.5));
 
-        uint8_t src_yuv_pixel[3];
+        float src_yuv_pixel[3];
         int half_col = FMT[0] / 2;
 
         for (int i = 0, now_row = 0, now_col = 0; i < FMT[2]; i++)
@@ -263,9 +294,9 @@ void input_yuvData_1f(int* FMT, struct VRAM_t *VRAM)
             src_yuv_pixel[2] = (*VRAM).raw[FMT[3] + int(now_row / 2) * half_col + int(now_col / 2)] - 128;
 
             // yuv to rgb
-            (*VRAM).data[3 * i + 2] = 7 * (src_yuv_pixel[0] >> 3) + (src_yuv_pixel[2] << 1);
-            (*VRAM).data[3 * i + 1] = src_yuv_pixel[0] - src_yuv_pixel[2];
-            (*VRAM).data[3 * i] = src_yuv_pixel[0] + (src_yuv_pixel[1] << 1);
+            (*VRAM).data[3 * i + 2] = Value_Check((0.875 * src_yuv_pixel[0]) + src_yuv_pixel[2] * 2, 0, 255);
+            (*VRAM).data[3 * i + 1] = Value_Check(src_yuv_pixel[0] - src_yuv_pixel[2], 0, 255);
+            (*VRAM).data[3 * i] = Value_Check(src_yuv_pixel[0] + src_yuv_pixel[1] * 2, 0, 255);
         }
     }
     else if (src.fail())
