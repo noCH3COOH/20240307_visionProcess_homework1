@@ -51,7 +51,7 @@ struct PID_t{
 // 双缓冲
 struct VRAM_t VRAM1 = {{0}, {0}, true};
 
-struct PID_t pid_para = {1.25, 0.6, 0.75, {0,0,0}};
+struct PID_t pid_para = {0.25, 2, 1, {0,0,0}};
 
 std::ifstream src;
 std::ofstream uni_log;
@@ -237,13 +237,13 @@ double pid_control(double last_value, double target_value)
     pid_para.e[2] = pid_para.e[1];
     pid_para.e[1] = pid_para.e[0];
 
-    pid_para.e[0] = Value_Check(target_value - last_value, -50, 50);
+    pid_para.e[0] = last_value - target_value;
 
     last_value += (pid_para.Kp * (pid_para.e[0] - pid_para.e[1]));
     last_value += (pid_para.Ki * pid_para.e[0]);
     last_value += (pid_para.Kd * (pid_para.e[0] - 2*pid_para.e[1] + pid_para.e[2]));
 
-    return last_value;
+    return Value_Check(last_value, 0, 100);
 }
 
 /**

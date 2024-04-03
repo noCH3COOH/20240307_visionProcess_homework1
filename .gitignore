@@ -4,3 +4,5 @@ video/
 .vscode/
 
 core.*
+
+log.txt
